@@ -39,15 +39,15 @@ export default async function DashboardPage() {
           ["Import clip", "/clips/new", "Upload an MP4"],
           ["Submissions", "/submissions", `${counts.pending} pending · ${counts.approved} approved`],
         ].map(([t, href, sub]) => (
-          <Link key={href} href={href} className="card p-4 transition hover:border-ink-600">
+          <Link key={href} href={href} className="card p-4 transition hover:border-border-strong">
             <p className="font-semibold">{t}</p>
-            <p className="mt-0.5 text-xs text-ink-400">{sub}</p>
+            <p className="mt-0.5 text-xs text-muted">{sub}</p>
           </Link>
         ))}
       </section>
 
       <h2 className="mb-3 text-lg font-semibold">Usage</h2>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {meters.map((m) => (
           <UsageMeter key={m.metric} metric={m.metric} used={m.used} limit={m.limit} detail={m.detail} />
         ))}

@@ -33,25 +33,25 @@ export default async function AccountsPage() {
             <section key={p} className="card p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">{PLATFORM_LABELS[p]}</p>
-                <p className={`font-mono text-xs ${limit !== null && list.length >= limit ? "text-amber-300" : "text-ink-400"}`}>
+                <p className={`font-mono text-xs ${limit !== null && list.length >= limit ? "text-warning" : "text-muted"}`}>
                   {list.length} / {limit ?? "∞"}
                 </p>
               </div>
               {list.length === 0 ? (
-                <p className="mt-2 text-sm text-ink-400">No account added.</p>
+                <p className="mt-2 text-sm text-muted">No account added.</p>
               ) : (
-                <ul className="mt-2 divide-y divide-ink-700">
+                <ul className="mt-2 divide-y divide-border">
                   {list.map((a) => (
                     <li key={a.id} className="flex items-center justify-between py-2 text-sm">
                       <a href={a.profile_url ?? "#"} target="_blank" rel="noopener noreferrer" className="hover:underline">@{a.handle}</a>
                       <form action={removeSocialAccount.bind(null, a.id)}>
-                        <button className="text-xs text-ink-400 hover:text-red-300">Remove</button>
+                        <button className="text-xs text-muted hover:text-danger">Remove</button>
                       </form>
                     </li>
                   ))}
                 </ul>
               )}
-              {limit !== null && list.length > limit && <p className="mt-2 text-xs text-amber-300">Over your plan&apos;s limit after a plan change. Nothing was removed, but you can&apos;t add more.</p>}
+              {limit !== null && list.length > limit && <p className="mt-2 text-xs text-warning">Over your plan&apos;s limit after a plan change. Nothing was removed, but you can&apos;t add more.</p>}
             </section>
           );
         })}

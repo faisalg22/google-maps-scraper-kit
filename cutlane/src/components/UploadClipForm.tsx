@@ -93,9 +93,9 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
     <form onSubmit={submit} className="card space-y-5 p-5">
       <div>
         <label className="label" htmlFor="file">Clip file (MP4)</label>
-        <label htmlFor="file" className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-ink-600 bg-ink-900 px-4 py-8 text-center hover:border-lane-400/60">
+        <label htmlFor="file" className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface px-4 py-8 text-center hover:border-primary-strong/60">
           <span className="text-sm font-medium">{file ? file.name : "Tap to choose an MP4"}</span>
-          <span className="mt-1 text-xs text-ink-400">{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : "Up to 1 GB"}</span>
+          <span className="mt-1 text-xs text-muted">{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : "Up to 1 GB"}</span>
         </label>
         <input id="file" type="file" accept="video/mp4" className="sr-only" onChange={(e) => pick(e.target.files?.[0] ?? null)} />
       </div>
@@ -104,20 +104,20 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
         <div className="flex gap-4">
           <video
             src={preview}
-            className="aspect-[9/16] w-28 rounded-lg bg-black object-contain"
+            className="aspect-[9/16] w-28 rounded-lg bg-player object-contain"
             muted
             playsInline
             controls
             onLoadedMetadata={(e) => setMeta({ w: e.currentTarget.videoWidth, h: e.currentTarget.videoHeight, d: e.currentTarget.duration })}
           />
-          <div className="text-xs text-ink-400">
+          <div className="text-xs text-muted">
             {meta && (
               <p>
                 {meta.w}×{meta.h} · {Math.round(meta.d)}s
               </p>
             )}
             {warnings.map((w) => (
-              <p key={w} className="mt-1 text-amber-300">{w}</p>
+              <p key={w} className="mt-1 text-warning">{w}</p>
             ))}
           </div>
         </div>
@@ -136,20 +136,20 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
             <option key={c.id} value={c.id}>{c.title}</option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-ink-400">You need a linked campaign to submit to Whop.</p>
+        <p className="mt-1 text-xs text-muted">You need a linked campaign to submit to Whop.</p>
       </div>
 
-      <label className="flex gap-3 rounded-xl border border-ink-700 bg-ink-900 p-3 text-sm">
-        <input type="checkbox" checked={rights} onChange={(e) => setRights(e.target.checked)} className="mt-0.5 h-4 w-4 accent-lane-400" />
+      <label className="flex gap-3 rounded-xl border border-border bg-surface p-3 text-sm">
+        <input type="checkbox" checked={rights} onChange={(e) => setRights(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary-strong" />
         <span>I made this clip from the campaign&apos;s provided content or with the creator&apos;s permission.</span>
       </label>
 
-      {error && <p className="text-sm text-red-300" role="alert">{error}</p>}
+      {error && <p className="text-sm text-danger" role="alert">{error}</p>}
       {upgrade && <UpgradePrompt upgrade={upgrade} />}
 
       {progress !== null && (
-        <div className="h-2 overflow-hidden rounded-full bg-ink-800" aria-label="Upload progress">
-          <div className="h-full bg-lane-400 transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+        <div className="h-2 overflow-hidden rounded-full bg-subtle" aria-label="Upload progress">
+          <div className="h-full bg-primary-strong transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
       )}
 

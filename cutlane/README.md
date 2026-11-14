@@ -108,6 +108,36 @@ How it works:
 
 Seats are stored and enforced in entitlements (1 on Beginner/Clipper, admin-set on Custom). A team-invite flow isn't built yet.
 
+## Light and dark theme
+
+There are three options: **Light**, **Dark** and **System** (the default, which follows the device's `prefers-color-scheme`). The toggle is in the sidebar header, the mobile top bar (icon-only, 40px tap targets), the public pages' headers, and **Settings → Appearance**.
+
+**Where the choice is stored and how it applies**
+- **Signed-in users:** saved in `users.theme_preference` (migration `0003_theme.sql`). The server renders it into `<html data-theme-pref>`, so every device starts in the right theme. Other tabs pick up a change through `storage` events; other devices re-read it when their tab regains focus.
+- **Signed-out visitors:** saved in `localStorage` (`cl-theme`). On first sign-in, if the account has no saved theme yet, the visitor's choice is adopted. If the account already has one, the account's choice wins.
+- **No flash on load:** an inline script in `<head>` (`THEME_INIT_SCRIPT` in `src/lib/theme.ts`) sets `html.dark` before first paint. It still works if the JavaScript bundles fail to load.
+
+**Design tokens**
+- `src/app/globals.css` is the only place colors live: light values in `:root`, dark in `.dark` (class-based dark mode via `@custom-variant dark`). Components use semantic utilities such as `bg-card`, `text-muted`, `border-border`, `text-success`, `bg-primary` and `ring-ring`, never raw palette colors.
+- **Accent:** CutLane lime (`--primary`) fills buttons in both themes. `--primary-strong` is lime in dark and a deep lime in light, used for links, borders, focus rings and meter bars so they keep contrast.
+- **Dark theme:** near-black background, off-white text, borders instead of shadows. **Light theme:** white cards on light gray with a subtle shadow.
+- **Logos:** light and dark variants are in `public/brand/`. The favicon adapts to the browser's own scheme.
+- **Video:** players and the YouTube embed sit on a near-black `--player-bg` letterbox in both themes.
+- Theme changes animate briefly (200 ms), except under `prefers-reduced-motion`.
+
+**Accessibility checks**
+- `tests/theme-contrast.test.ts` checks every token pair against WCAG AA in both themes: body and status text 4.5:1 on every surface and on status tints, input borders, focus ring and meter bars 3:1.
+- `scripts/contrast-audit.mjs` runs axe-core's contrast rule plus a horizontal-overflow check on every page, in light and dark, at mobile and desktop widths.
+- The toggle is a WAI-ARIA radio group: arrow keys, Home and End move between options, and each option has a label.
+
+**End-to-end tests**
+```bash
+rm -rf .data && npm run build && npm start      # fresh demo database
+npm run test:e2e                                 # default=system, persists on reload, no flash, sign-in sync, keyboard
+node scripts/contrast-audit.mjs --shots ./shots  # every page × light/dark × mobile/desktop
+```
+These need Playwright with Chromium (`npm i -D playwright && npx playwright install chromium`). It's pre-installed in Claude Code cloud sessions. The sign-in sync test expects the demo account to have no saved theme yet, so run it against a fresh `.data`.
+
 ## The first real Whop call
 
 On the first live `GET /bounties` (and on the first submission), CutLane:
@@ -191,6 +221,7 @@ A clip can be submitted only when it is linked to an **open** campaign, its foot
 | `npm run dev` / `build` / `start` | Next.js |
 | `npm test` | Unit tests (billing: trial/upgrade/downgrade/cancel/payment failure, usage counters on Postgres, webhook signatures; URL validation, field normalisation, encryption) |
 | `npm run lint` | Type-check |
+| `npm run test:e2e` | Browser tests for the theme (needs a running server + Playwright) |
 | `npm run db:migrate` | Apply `supabase/migrations/*.sql` to `DATABASE_URL` |
 | `npm run keygen` | Print a new 32-byte base64 key |
 

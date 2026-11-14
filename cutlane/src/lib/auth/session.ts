@@ -17,6 +17,7 @@ export interface User {
   avatar_url: string | null;
   email: string | null;
   is_demo: boolean;
+  theme_preference: "light" | "dark" | "system" | null;
 }
 
 export async function upsertUser(u: {
@@ -33,7 +34,7 @@ export async function upsertUser(u: {
      on conflict (whop_user_id) do update set
        username = excluded.username, name = excluded.name, avatar_url = excluded.avatar_url,
        email = excluded.email, updated_at = now()
-     returning id, whop_user_id, username, name, avatar_url, email, is_demo`,
+     returning id, whop_user_id, username, name, avatar_url, email, is_demo, theme_preference`,
     [u.whopUserId, u.username ?? null, u.name ?? null, u.avatarUrl ?? null, u.email ?? null, u.isDemo ?? false],
   );
   return row!;
@@ -76,7 +77,7 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   const token = jar.get(SESSION_COOKIE)?.value;
   if (!token || token.length > 200) return null;
   return one<User>(
-    `select u.id, u.whop_user_id, u.username, u.name, u.avatar_url, u.email, u.is_demo
+    `select u.id, u.whop_user_id, u.username, u.name, u.avatar_url, u.email, u.is_demo, u.theme_preference
        from sessions s join users u on u.id = s.user_id
       where s.token_hash = $1 and s.expires_at > now()`,
     [sha256(token)],

@@ -24,7 +24,7 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
           {video.isDemo && <DemoTag />}
           <h1 className="text-xl font-bold leading-tight sm:text-2xl">{video.title}</h1>
         </div>
-        <p className="mt-1 text-sm text-ink-400">
+        <p className="mt-1 text-sm text-muted">
           {compactNumber(video.views)} views · {video.likes !== null ? `${compactNumber(video.likes)} likes · ` : ""}
           {formatDuration(video.durationSeconds)} · {formatDate(video.publishedAt)}
           {!video.isDemo && (
@@ -39,7 +39,7 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
         video={{ id: video.id, title: video.title, channelId: video.channelId, channelTitle: video.channelTitle, durationSeconds: video.durationSeconds, isDemo: video.isDemo }}
         notes={notes}
       />
-      <p className="mt-6 text-xs text-ink-400">
+      <p className="mt-6 text-xs text-muted">
         Research only. CutLane plays YouTube through the official embedded player and never downloads videos. Saved notes are in your{" "}
         <Link href="/swipe" className="underline">swipe file</Link>.
       </p>

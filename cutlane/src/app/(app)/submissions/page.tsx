@@ -24,7 +24,7 @@ export default async function SubmissionsPage() {
         ].map(([label, n]) => (
           <div key={label} className="card p-4">
             <p className="text-2xl font-bold">{n}</p>
-            <p className="text-xs text-ink-400">{label}</p>
+            <p className="text-xs text-muted">{label}</p>
           </div>
         ))}
       </div>
@@ -41,7 +41,7 @@ export default async function SubmissionsPage() {
                     {s.is_demo && <DemoTag label="Demo" />}
                     <p className="truncate font-semibold">{s.clip_title ?? "Deleted clip"}</p>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-ink-400">
+                  <p className="mt-0.5 truncate text-xs text-muted">
                     {s.campaign_title ?? s.bounty_id} · submitted {formatDate(s.submitted_at)}
                     {s.resolved_at ? ` · resolved ${formatDate(s.resolved_at)}` : ""}
                   </p>
@@ -52,15 +52,15 @@ export default async function SubmissionsPage() {
                 <ul className="mt-3 flex flex-wrap gap-1.5">
                   {s.urls.map((u) => (
                     <li key={u}>
-                      <a href={u} target="_blank" rel="noopener noreferrer" className="chip max-w-[260px] truncate hover:text-ink-100">{new URL(u).hostname.replace("www.", "")} ↗</a>
+                      <a href={u} target="_blank" rel="noopener noreferrer" className="chip max-w-[260px] truncate hover:text-fg">{new URL(u).hostname.replace("www.", "")} ↗</a>
                     </li>
                   ))}
                   {s.file_ids.length > 0 && <li className="chip">+ clip file</li>}
                 </ul>
               )}
-              {s.denial_reason && <p className="mt-3 rounded-lg bg-red-400/10 px-3 py-2 text-sm text-red-200">Reason: {s.denial_reason}</p>}
+              {s.denial_reason && <p className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">Reason: {s.denial_reason}</p>}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                {s.clip_id ? <Link href={`/clips/${s.clip_id}`} className="text-sm text-lane-400 hover:underline">Open clip →</Link> : <span />}
+                {s.clip_id ? <Link href={`/clips/${s.clip_id}`} className="text-sm text-primary-strong hover:underline">Open clip →</Link> : <span />}
                 {s.is_demo && s.status === "submitted" && !modes.whop && <SimulateReview submissionId={s.id} />}
               </div>
             </li>

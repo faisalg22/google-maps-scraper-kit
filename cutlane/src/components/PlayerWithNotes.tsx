@@ -81,7 +81,7 @@ function YouTubePlayer({ videoId, onReady }: { videoId: string; onReady: (h: Pla
     };
   }, [videoId, onReady]);
   return (
-    <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black [&>iframe]:h-full [&>iframe]:w-full">
+    <div className="aspect-video w-full overflow-hidden rounded-2xl border border-border bg-player [color-scheme:normal] [&>iframe]:h-full [&>iframe]:w-full">
       <div ref={ref} />
     </div>
   );
@@ -102,22 +102,22 @@ function DemoPlayer({ duration, onReady }: { duration: number; onReady: (h: Play
     return () => clearInterval(iv);
   }, [playing, duration]);
   return (
-    <div className="flex aspect-video w-full flex-col justify-between overflow-hidden rounded-2xl border border-ink-700 bg-gradient-to-br from-ink-800 via-ink-900 to-black p-4">
-      <span className="self-start rounded-md border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+    <div className="flex aspect-video w-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-subtle via-surface to-bg p-4">
+      <span className="self-start rounded-md border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning">
         Demo player: no real video
       </span>
       <button
         type="button"
         onClick={() => setPlaying((p) => !p)}
-        className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-lane-400 text-2xl text-ink-950 hover:bg-lane-500"
+        className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary text-2xl text-primary-fg hover:bg-primary-hover"
         aria-label={playing ? "Pause" : "Play"}
       >
         {playing ? "❚❚" : "▶"}
       </button>
       <div className="flex items-center gap-3">
-        <span className="font-mono text-xs text-ink-300">{formatDuration(t)}</span>
-        <input type="range" min={0} max={duration} value={t} onChange={(e) => setT(Number(e.target.value))} className="flex-1 accent-lane-400" aria-label="Seek" />
-        <span className="font-mono text-xs text-ink-400">{formatDuration(duration)}</span>
+        <span className="font-mono text-xs text-fg-secondary">{formatDuration(t)}</span>
+        <input type="range" min={0} max={duration} value={t} onChange={(e) => setT(Number(e.target.value))} className="flex-1 accent-primary-strong" aria-label="Seek" />
+        <span className="font-mono text-xs text-muted">{formatDuration(duration)}</span>
       </div>
     </div>
   );
@@ -191,14 +191,14 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
                 key={t}
                 type="button"
                 onClick={() => toggleTag(t)}
-                className={`chip ${tags.includes(t) ? "border-lane-400 bg-lane-400/10 text-lane-400" : ""}`}
+                className={`chip ${tags.includes(t) ? "border-primary-strong bg-primary-strong/10 text-primary-strong" : ""}`}
                 aria-pressed={tags.includes(t)}
               >
                 {t}
               </button>
             ))}
           </div>
-          {error && <p className="text-sm text-red-300">{error}</p>}
+          {error && <p className="text-sm text-danger">{error}</p>}
           {upgrade && <UpgradePrompt upgrade={upgrade} />}
           <button disabled={pending} className="btn-primary w-full">
             {pending ? "Saving…" : "Save to swipe file"}
@@ -207,25 +207,25 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
 
         <div className="card p-4">
           <p className="mb-2 text-sm font-semibold">
-            Notes on this video <span className="text-ink-400">({notes.length})</span>
+            Notes on this video <span className="text-muted">({notes.length})</span>
           </p>
           {notes.length === 0 ? (
-            <p className="text-sm text-ink-400">No notes yet. Pause on a strong moment and save it.</p>
+            <p className="text-sm text-muted">No notes yet. Pause on a strong moment and save it.</p>
           ) : (
-            <ul className="divide-y divide-ink-700">
+            <ul className="divide-y divide-border">
               {notes.map((n) => (
                 <li key={n.id} className="flex gap-3 py-2.5">
-                  <button type="button" onClick={() => handle.current?.seek(n.timestamp_seconds)} className="h-fit rounded-md bg-ink-700 px-1.5 py-0.5 font-mono text-xs text-lane-400 hover:bg-ink-600">
+                  <button type="button" onClick={() => handle.current?.seek(n.timestamp_seconds)} className="h-fit rounded-md bg-subtle-strong px-1.5 py-0.5 font-mono text-xs text-primary-strong hover:bg-border">
                     {formatDuration(n.timestamp_seconds)}
                   </button>
                   <div className="min-w-0 flex-1">
                     <p className="whitespace-pre-wrap break-words text-sm">{n.note}</p>
-                    {n.tags.length > 0 && <p className="mt-1 text-xs text-ink-400">{n.tags.map((t) => `#${t.replace(/\s+/g, "-")}`).join(" ")}</p>}
+                    {n.tags.length > 0 && <p className="mt-1 text-xs text-muted">{n.tags.map((t) => `#${t.replace(/\s+/g, "-")}`).join(" ")}</p>}
                   </div>
                   <button
                     type="button"
                     onClick={() => start(async () => { await deleteSwipeNote(n.id); router.refresh(); })}
-                    className="h-fit text-xs text-ink-400 hover:text-red-300"
+                    className="h-fit text-xs text-muted hover:text-danger"
                     aria-label="Delete note"
                   >
                     ✕

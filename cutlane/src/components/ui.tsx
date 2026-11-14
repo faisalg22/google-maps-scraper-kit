@@ -4,8 +4,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="text-2xl font-bold tracking-tight text-ink-100 sm:text-3xl">{title}</h1>
-        {subtitle ? <p className="mt-1 text-sm text-ink-400">{subtitle}</p> : null}
+        <h1 className="text-2xl font-bold tracking-tight text-fg sm:text-3xl">{title}</h1>
+        {subtitle ? <p className="mt-1 text-sm text-muted">{subtitle}</p> : null}
       </div>
       {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
     </div>
@@ -14,19 +14,19 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function DemoTag({ label = "Demo data" }: { label?: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-300">
+    <span className="inline-flex items-center gap-1 rounded-md border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning">
       {label}
     </span>
   );
 }
 
 const tone: Record<string, string> = {
-  neutral: "border-ink-600 bg-ink-800 text-ink-300",
-  green: "border-emerald-400/40 bg-emerald-400/10 text-emerald-300",
-  red: "border-red-400/40 bg-red-400/10 text-red-300",
-  amber: "border-amber-400/40 bg-amber-400/10 text-amber-300",
-  blue: "border-sky-400/40 bg-sky-400/10 text-sky-300",
-  lane: "border-lane-400/40 bg-lane-400/10 text-lane-400",
+  neutral: "border-border-strong bg-subtle text-fg-secondary",
+  green: "border-success/40 bg-success/10 text-success",
+  red: "border-danger/40 bg-danger/10 text-danger",
+  amber: "border-warning/40 bg-warning/10 text-warning",
+  blue: "border-info/40 bg-info/10 text-info",
+  lane: "border-primary-strong/40 bg-primary-strong/10 text-primary-strong",
 };
 
 export function Badge({ children, color = "neutral" }: { children: React.ReactNode; color?: keyof typeof tone }) {
@@ -62,8 +62,8 @@ export function StatusBadge({ status }: { status: string }) {
 export function EmptyState({ title, body, action }: { title: string; body?: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="card flex flex-col items-center px-6 py-12 text-center">
-      <p className="text-base font-semibold text-ink-100">{title}</p>
-      {body ? <p className="mt-1 max-w-md text-sm text-ink-400">{body}</p> : null}
+      <p className="text-base font-semibold text-fg">{title}</p>
+      {body ? <p className="mt-1 max-w-md text-sm text-muted">{body}</p> : null}
       {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
@@ -71,12 +71,12 @@ export function EmptyState({ title, body, action }: { title: string; body?: Reac
 
 export function CopyrightNotice({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-amber-400/30 bg-amber-400/5 p-3.5 text-sm text-amber-100/90" role="note">
-      <span aria-hidden className="mt-0.5 text-amber-300">©</span>
+    <div className="flex gap-3 rounded-xl border border-warning/30 bg-warning/5 p-3.5 text-sm text-fg-secondary" role="note">
+      <span aria-hidden className="mt-0.5 text-warning">©</span>
       <div>
-        <p className="font-semibold text-amber-200">Use only footage you're allowed to use</p>
+        <p className="font-semibold text-warning">Use only footage you're allowed to use</p>
         {!compact && (
-          <p className="mt-0.5 text-amber-100/70">
+          <p className="mt-0.5 text-fg-secondary">
             Clip from the campaign&apos;s provided content or with the creator&apos;s written permission. Editing someone else&apos;s video
             doesn&apos;t remove their copyright, and Whop reviewers check. YouTube in CutLane is for research only: nothing is downloaded.
           </p>
@@ -88,10 +88,10 @@ export function CopyrightNotice({ compact = false }: { compact?: boolean }) {
 
 export function Alert({ kind = "info", children }: { kind?: "info" | "error" | "success" | "warn"; children: React.ReactNode }) {
   const cls = {
-    info: "border-sky-400/30 bg-sky-400/5 text-sky-100",
-    error: "border-red-400/30 bg-red-400/10 text-red-200",
-    success: "border-emerald-400/30 bg-emerald-400/10 text-emerald-200",
-    warn: "border-amber-400/30 bg-amber-400/10 text-amber-100",
+    info: "border-info/30 bg-info/5 text-info",
+    error: "border-danger/30 bg-danger/10 text-danger",
+    success: "border-success/30 bg-success/10 text-success",
+    warn: "border-warning/30 bg-warning/10 text-warning",
   }[kind];
   return <div className={`rounded-xl border px-3.5 py-2.5 text-sm ${cls}`}>{children}</div>;
 }
@@ -99,8 +99,8 @@ export function Alert({ kind = "info", children }: { kind?: "info" | "error" | "
 export function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
     <div className="min-w-0">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-ink-400">{label}</p>
-      <p className="truncate text-sm font-semibold text-ink-100" title={hint}>
+      <p className="text-[11px] font-medium uppercase tracking-wide text-muted">{label}</p>
+      <p className="truncate text-sm font-semibold text-fg" title={hint}>
         {value}
       </p>
     </div>
@@ -109,7 +109,7 @@ export function Stat({ label, value, hint }: { label: string; value: React.React
 
 export function BackLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="mb-4 inline-flex items-center gap-1 text-sm text-ink-400 hover:text-ink-100">
+    <Link href={href} className="mb-4 inline-flex items-center gap-1 text-sm text-muted hover:text-fg">
       <span aria-hidden>←</span> {children}
     </Link>
   );

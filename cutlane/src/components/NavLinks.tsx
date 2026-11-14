@@ -13,10 +13,11 @@ const items = [
 ];
 
 const secondary = [
+  { href: "/settings", label: "Settings", icon: "⚙" },
   { href: "/billing", label: "Billing & usage", icon: "$" },
   { href: "/settings/accounts", label: "Posting accounts", icon: "@" },
   { href: "/pricing", label: "Plans", icon: "★" },
-  { href: "/status", label: "Integrations status", icon: "⚙" },
+  { href: "/status", label: "Integrations status", icon: "ⓘ" },
 ];
 
 export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bottom"; admin?: boolean }) {
@@ -30,7 +31,7 @@ export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bot
           .filter((i) => i.bottom)
           .map((i) => (
             <li key={i.href}>
-              <Link href={i.href} className={`flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${active(i.href) ? "text-lane-400" : "text-ink-400"}`}>
+              <Link href={i.href} className={`flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium ${active(i.href) ? "text-primary-strong" : "text-muted"}`}>
                 <span aria-hidden className="text-base leading-none">{i.icon}</span>
                 {i.short}
               </Link>
@@ -46,9 +47,9 @@ export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bot
         <li key={i.href}>
           <Link
             href={i.href}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${active(i.href) ? "bg-ink-800 text-ink-100" : "text-ink-400 hover:bg-ink-850 hover:text-ink-100"}`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${active(i.href) ? "bg-subtle text-fg" : "text-muted hover:bg-card hover:text-fg"}`}
           >
-            <span aria-hidden className={`w-4 text-center ${active(i.href) ? "text-lane-400" : ""}`}>{i.icon}</span>
+            <span aria-hidden className={`w-4 text-center ${active(i.href) ? "text-primary-strong" : ""}`}>{i.icon}</span>
             {i.label}
           </Link>
         </li>
@@ -56,7 +57,7 @@ export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bot
       <li className="pt-4" />
       {sec.map((i) => (
         <li key={i.href}>
-          <Link href={i.href} className={`flex items-center gap-3 rounded-xl px-3 py-1.5 text-xs font-medium ${active(i.href) ? "bg-ink-800 text-ink-100" : "text-ink-400 hover:text-ink-100"}`}>
+          <Link href={i.href} className={`flex items-center gap-3 rounded-xl px-3 py-1.5 text-xs font-medium ${active(i.href) ? "bg-subtle text-fg" : "text-muted hover:text-fg"}`}>
             <span aria-hidden className="w-4 text-center">{i.icon}</span>
             {i.label}
           </Link>

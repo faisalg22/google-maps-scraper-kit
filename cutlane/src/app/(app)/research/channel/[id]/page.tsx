@@ -47,16 +47,16 @@ export default async function ChannelPage({ params, searchParams }: { params: Pr
           <div className="flex items-center gap-4">
             {channel.thumbnail ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={channel.thumbnail} alt="" className="h-16 w-16 rounded-full" />
+              <img src={channel.thumbnail} alt="" className="h-16 w-16 rounded-full bg-subtle object-cover" />
             ) : (
-              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-ink-600 to-ink-800 text-xl font-bold">{channel.title.slice(0, 1)}</span>
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-border to-subtle text-xl font-bold">{channel.title.slice(0, 1)}</span>
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="truncate text-2xl font-bold">{channel.title}</h1>
                 {channel.isDemo && <DemoTag />}
               </div>
-              <p className="text-sm text-ink-400">
+              <p className="text-sm text-muted">
                 {compactNumber(channel.subscribers)} subscribers · {compactNumber(channel.videoCount)} videos · {compactNumber(channel.viewCount)} views
               </p>
             </div>
@@ -75,35 +75,35 @@ export default async function ChannelPage({ params, searchParams }: { params: Pr
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-ink-400">Sort:</span>
+            <span className="text-muted">Sort:</span>
             {(Object.keys(SORTS) as Sort[]).map((s) => (
-              <Link key={s} href={qs({ sort: s })} className={`chip ${s === sort ? "border-lane-400 text-lane-400" : ""}`}>{SORTS[s]}</Link>
+              <Link key={s} href={qs({ sort: s })} className={`chip ${s === sort ? "border-primary-strong text-primary-strong" : ""}`}>{SORTS[s]}</Link>
             ))}
-            <span className="ml-2 text-ink-400">Length:</span>
+            <span className="ml-2 text-muted">Length:</span>
             {LENGTHS.map((l) => (
-              <Link key={l} href={qs({ len: String(l) })} className={`chip ${l === minMin ? "border-lane-400 text-lane-400" : ""}`}>{l}+ min</Link>
+              <Link key={l} href={qs({ len: String(l) })} className={`chip ${l === minMin ? "border-primary-strong text-primary-strong" : ""}`}>{l}+ min</Link>
             ))}
           </div>
-          <p className="mt-2 text-xs text-ink-400">From the channel&apos;s latest 50 uploads, long videos only.</p>
+          <p className="mt-2 text-xs text-muted">From the channel&apos;s latest 50 uploads, long videos only.</p>
 
           <div className="mt-4 space-y-2">
             {sorted.length === 0 && <EmptyState title="No long videos in recent uploads" body="Try a shorter minimum length." />}
             {sorted.map((v) => (
-              <Link key={v.id} href={`/research/video/${encodeURIComponent(v.id)}`} className="card flex gap-3 p-3 transition hover:border-ink-600">
-                <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-ink-700 to-ink-900 sm:w-48">
+              <Link key={v.id} href={`/research/video/${encodeURIComponent(v.id)}`} className="card flex gap-3 p-3 transition hover:border-border-strong">
+                <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-lg bg-gradient-to-br from-subtle-strong to-surface sm:w-48">
                   {v.thumbnail && (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={v.thumbnail} alt="" className="h-full w-full object-cover" loading="lazy" />
                   )}
-                  <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 font-mono text-[11px]">{formatDuration(v.durationSeconds)}</span>
+                  <span className="absolute bottom-1 right-1 rounded bg-overlay text-overlay-fg px-1 font-mono text-[11px]">{formatDuration(v.durationSeconds)}</span>
                 </div>
                 <div className="min-w-0 py-0.5">
                   <p className="line-clamp-2 text-sm font-semibold">{v.title}</p>
-                  <p className="mt-1 text-xs text-ink-400">
+                  <p className="mt-1 text-xs text-muted">
                     {compactNumber(v.views)} views · {v.likes !== null ? `${compactNumber(v.likes)} likes · ` : ""}
                     {formatDate(v.publishedAt)}
                   </p>
-                  {v.likes !== null && v.views > 0 && <p className="mt-1 text-xs text-lane-400">{((v.likes / v.views) * 100).toFixed(1)}% like rate</p>}
+                  {v.likes !== null && v.views > 0 && <p className="mt-1 text-xs text-primary-strong">{((v.likes / v.views) * 100).toFixed(1)}% like rate</p>}
                 </div>
               </Link>
             ))}

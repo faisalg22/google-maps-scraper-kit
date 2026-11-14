@@ -24,19 +24,19 @@ export function SubmitPanel({
     <form action={action} className="card space-y-4 p-4">
       <div>
         <p className="font-semibold">Submit to Whop</p>
-        <p className="text-xs text-ink-400">Only links that are saved and load publicly are sent (up to 10).</p>
+        <p className="text-xs text-muted">Only links that are saved and load publicly are sent (up to 10).</p>
       </div>
 
       {urls.length > 0 && (
         <ul className="space-y-1">
           {urls.map((u) => (
-            <li key={u} className="truncate rounded-lg bg-ink-900 px-3 py-1.5 font-mono text-xs text-emerald-300">✓ {u}</li>
+            <li key={u} className="truncate rounded-lg bg-surface px-3 py-1.5 font-mono text-xs text-success">✓ {u}</li>
           ))}
         </ul>
       )}
 
       {blockers.length > 0 && (
-        <ul className="space-y-1 text-sm text-amber-200">
+        <ul className="space-y-1 text-sm text-warning">
           {blockers.map((b) => (
             <li key={b}>• {b}</li>
           ))}
@@ -50,13 +50,13 @@ export function SubmitPanel({
 
       {canAttach ? (
         <label className="flex gap-2 text-sm">
-          <input type="checkbox" name="attachFile" defaultChecked className="mt-0.5 h-4 w-4 accent-lane-400" />
+          <input type="checkbox" name="attachFile" defaultChecked className="mt-0.5 h-4 w-4 accent-primary-strong" />
           <span>
-            Attach the clip file too <span className="text-ink-400">(uploaded to Whop Files from our server)</span>
+            Attach the clip file too <span className="text-muted">(uploaded to Whop Files from our server)</span>
           </span>
         </label>
       ) : (
-        <p className="text-xs text-ink-400">This campaign accepts post links only, so the file isn&apos;t attached.</p>
+        <p className="text-xs text-muted">This campaign accepts post links only, so the file isn&apos;t attached.</p>
       )}
 
       <ActionFeedback state={state} />

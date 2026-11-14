@@ -39,13 +39,13 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
       <BackLink href="/clips">Clip library</BackLink>
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge status={clip.status} />
-        <span className="text-xs text-ink-400">Imported {formatDate(clip.created_at)} · {formatBytes(clip.size_bytes)}</span>
+        <span className="text-xs text-muted">Imported {formatDate(clip.created_at)} · {formatBytes(clip.size_bytes)}</span>
       </div>
       <h1 className="mt-2 text-2xl font-bold tracking-tight">{clip.title}</h1>
       {clip.campaign_id && (
-        <p className="mt-1 text-sm text-ink-400">
+        <p className="mt-1 text-sm text-muted">
           For{" "}
-          <Link href={`/campaigns/${encodeURIComponent(clip.campaign_id)}`} className="text-lane-400 hover:underline">
+          <Link href={`/campaigns/${encodeURIComponent(clip.campaign_id)}`} className="text-primary-strong hover:underline">
             {clip.campaign_title ?? clip.campaign_id}
           </Link>
         </p>
@@ -53,7 +53,7 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="space-y-4">
-          <video src={`/api/clips/${clip.id}/file`} controls playsInline preload="metadata" className="mx-auto aspect-[9/16] w-full max-w-[220px] sm:max-w-[300px] rounded-2xl border border-ink-700 bg-black object-contain" />
+          <video src={`/api/clips/${clip.id}/file`} controls playsInline preload="metadata" className="mx-auto aspect-[9/16] w-full max-w-[220px] sm:max-w-[300px] rounded-2xl border border-border bg-player object-contain" />
           <div className="card space-y-4 p-4">
             <ClipSettings clipId={clip.id} title={clip.title} />
             <form action={deleteClip.bind(null, clip.id)}>
@@ -65,7 +65,7 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
         <div className="space-y-6">
           <section>
             <h2 className="mb-1 text-lg font-semibold">1 · Post it</h2>
-            <p className="mb-3 text-sm text-ink-400">Post manually on each platform, then paste the live link. We check the format and that the post loads publicly.</p>
+            <p className="mb-3 text-sm text-muted">Post manually on each platform, then paste the live link. We check the format and that the post loads publicly.</p>
             <div className="space-y-3">
               {PLATFORMS.map((p) => (
                 <PostingPanel key={p} clipId={clip.id} platform={p} link={links.find((l) => l.platform === p) ?? null} locked={locked} />
@@ -84,13 +84,13 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
               <ul className="space-y-2">
                 {subs.map((s) => (
                   <li key={s.id} className="card flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
-                    <span className="text-ink-300">Submitted {formatDate(s.submitted_at)} · {s.urls.length} link{s.urls.length === 1 ? "" : "s"}</span>
+                    <span className="text-fg-secondary">Submitted {formatDate(s.submitted_at)} · {s.urls.length} link{s.urls.length === 1 ? "" : "s"}</span>
                     <StatusBadge status={s.status} />
-                    {s.denial_reason && <p className="w-full text-xs text-red-300">Reason: {s.denial_reason}</p>}
+                    {s.denial_reason && <p className="w-full text-xs text-danger">Reason: {s.denial_reason}</p>}
                   </li>
                 ))}
               </ul>
-              <Link href="/submissions" className="mt-2 inline-block text-sm text-lane-400 hover:underline">All submissions →</Link>
+              <Link href="/submissions" className="mt-2 inline-block text-sm text-primary-strong hover:underline">All submissions →</Link>
             </section>
           )}
 

@@ -42,14 +42,14 @@ export default async function AdminPage() {
               <details key={w.id} className="card p-4">
                 <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2">
                   <span>
-                    <span className="font-semibold">{w.name}</span> <span className="text-xs text-ink-400">@{w.owner} · {w.members} member{w.members === 1 ? "" : "s"} · since {formatDate(w.created_at.toString())}</span>
+                    <span className="font-semibold">{w.name}</span> <span className="text-xs text-muted">@{w.owner} · {w.members} member{w.members === 1 ? "" : "s"} · since {formatDate(w.created_at.toString())}</span>
                   </span>
                   <span className="flex gap-1.5">
                     <Badge color={w.plan ? "lane" : "neutral"}>{w.plan ? PLANS[w.plan as keyof typeof PLANS].name : "No plan"}</Badge>
                     {w.status && <Badge>{w.status}{w.source ? ` · ${w.source}` : ""}</Badge>}
                   </span>
                 </summary>
-                <div className="mt-4 border-t border-ink-700 pt-4">
+                <div className="mt-4 border-t border-border pt-4">
                   <AdminPlanForm workspaceId={w.id} current={current} seats={w.seats ?? 1} />
                   {w.source === "manual" && w.status === "active" && (
                     <form action={adminEndCustomPlan.bind(null, w.id)} className="mt-3">
@@ -66,22 +66,22 @@ export default async function AdminPage() {
       <section>
         <h2 className="mb-3 text-lg font-semibold">Sales leads</h2>
         {leads.length === 0 ? (
-          <p className="text-sm text-ink-400">No leads yet.</p>
+          <p className="text-sm text-muted">No leads yet.</p>
         ) : (
           <div className="card overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="text-ink-400">
-                <tr className="border-b border-ink-700">
+              <thead className="text-muted">
+                <tr className="border-b border-border">
                   <th className="p-3 font-medium">Date</th><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th>
                   <th className="p-3 font-medium">Team</th><th className="p-3 font-medium">Accounts</th><th className="p-3 font-medium">Email sent</th>
                 </tr>
               </thead>
               <tbody>
                 {leads.map((l) => (
-                  <tr key={l.id} className="border-b border-ink-800 align-top last:border-0">
-                    <td className="p-3 text-ink-400">{formatDate(l.created_at.toString())}</td>
-                    <td className="p-3">{l.name}{l.message && <p className="mt-1 max-w-xs text-xs text-ink-400">{l.message}</p>}</td>
-                    <td className="p-3"><a href={`mailto:${l.email}`} className="text-lane-400 hover:underline">{l.email}</a></td>
+                  <tr key={l.id} className="border-b border-border-subtle align-top last:border-0">
+                    <td className="p-3 text-muted">{formatDate(l.created_at.toString())}</td>
+                    <td className="p-3">{l.name}{l.message && <p className="mt-1 max-w-xs text-xs text-muted">{l.message}</p>}</td>
+                    <td className="p-3"><a href={`mailto:${l.email}`} className="text-primary-strong hover:underline">{l.email}</a></td>
                     <td className="p-3">{l.team_size}</td>
                     <td className="p-3">{l.accounts_needed}</td>
                     <td className="p-3"><Badge color={l.email_status === "sent" ? "green" : l.email_status === "failed" ? "red" : "neutral"}>{l.email_status}</Badge></td>

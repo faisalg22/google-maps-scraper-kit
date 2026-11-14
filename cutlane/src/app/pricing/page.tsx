@@ -7,6 +7,8 @@ import { annualAvailable } from "@/lib/billing/stripe";
 import { startCheckout } from "../billing-actions";
 import { ContactSalesForm, WaitlistForm } from "@/components/billing-client";
 import { Alert, DemoTag } from "@/components/ui";
+import { Logo } from "@/components/Brand";
+import { ThemeToggle } from "@/components/theme";
 
 export const metadata = { title: "Pricing" };
 export const dynamic = "force-dynamic";
@@ -72,18 +74,17 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold tracking-tight">
-          Cut<span className="text-lane-400">Lane</span>
-        </Link>
+        <Logo href="/" />
         <div className="flex items-center gap-2">
           {!modes.stripe && <DemoTag label="Test mode" />}
+          <ThemeToggle compact />
           {user ? <Link href="/dashboard" className="btn-ghost">Back to app</Link> : <Link href="/?returnTo=/pricing" className="btn-ghost">Sign in</Link>}
         </div>
       </header>
 
       <section className="mx-auto mt-10 max-w-2xl text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Simple plans for serious clippers</h1>
-        <p className="mt-3 text-ink-300">Research hooks, post clips and submit to Whop from one place. Start with a 3-day free trial.</p>
+        <p className="mt-3 text-fg-secondary">Research hooks, post clips and submit to Whop from one place. Start with a 3-day free trial.</p>
       </section>
 
       <div className="mx-auto mt-6 max-w-2xl space-y-2">
@@ -95,34 +96,34 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
       {annualOn && (
         <div className="mt-6 flex justify-center">
-          <div className="inline-flex rounded-xl border border-ink-700 bg-ink-850 p-1 text-sm">
-            <Link href="/pricing" className={`rounded-lg px-4 py-1.5 ${interval === "month" ? "bg-ink-700 text-ink-100" : "text-ink-400"}`}>Monthly</Link>
-            <Link href="/pricing?billing=annual" className={`rounded-lg px-4 py-1.5 ${interval === "year" ? "bg-ink-700 text-ink-100" : "text-ink-400"}`}>
-              Annual <span className="text-lane-400">· 2 months free</span>
+          <div className="inline-flex rounded-xl border border-border bg-card p-1 text-sm">
+            <Link href="/pricing" className={`rounded-lg px-4 py-1.5 ${interval === "month" ? "bg-subtle-strong text-fg" : "text-muted"}`}>Monthly</Link>
+            <Link href="/pricing?billing=annual" className={`rounded-lg px-4 py-1.5 ${interval === "year" ? "bg-subtle-strong text-fg" : "text-muted"}`}>
+              Annual <span className="text-primary-strong">· 2 months free</span>
             </Link>
           </div>
         </div>
       )}
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-3">
+      <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Beginner */}
-        <div className={`card relative flex flex-col p-6 ${sp.start === "beginner" ? "border-lane-400" : "border-lane-400/50"}`}>
-          <span className="absolute -top-3 left-6 rounded-full bg-lane-400 px-2.5 py-0.5 text-xs font-bold text-ink-950">3-day free trial</span>
+        <div className={`card relative flex flex-col p-6 ${sp.start === "beginner" ? "border-primary-strong" : "border-primary-strong/50"}`}>
+          <span className="absolute -top-3 left-6 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-fg">3-day free trial</span>
           <h2 className="text-xl font-bold">{b.name}</h2>
-          <p className="mt-1 text-sm text-ink-400">{b.tagline}</p>
+          <p className="mt-1 text-sm text-muted">{b.tagline}</p>
           <p className="mt-5">
             <span className="text-4xl font-extrabold">${price(b)}</span>
-            <span className="text-ink-400">/{interval === "year" ? "year" : "month"}</span>
+            <span className="text-muted">/{interval === "year" ? "year" : "month"}</span>
           </p>
-          {interval === "year" && <p className="text-xs text-lane-400">That&apos;s ${(b.annualPrice! / 12).toFixed(2)}/mo: 2 months free</p>}
-          <ul className="mt-5 space-y-2 text-sm text-ink-300">
+          {interval === "year" && <p className="text-xs text-primary-strong">That&apos;s ${(b.annualPrice! / 12).toFixed(2)}/mo: 2 months free</p>}
+          <ul className="mt-5 space-y-2 text-sm text-fg-secondary">
             <li>✓ {b.limits.clips_monthly} clip uploads / month</li>
             <li>✓ {b.limits.submissions_monthly} Whop submissions / month</li>
             <li>✓ {b.limits.saved_channels} saved YouTube channels</li>
             <li>✓ {b.limits.notes} swipe-file notes</li>
             <li>✓ {b.limits.accounts_per_platform} account per platform</li>
             <li>✓ Manual posting with link capture</li>
-            <li className="text-ink-400">✗ Editor &amp; auto-post</li>
+            <li className="text-muted">✗ Editor &amp; auto-post</li>
           </ul>
           <div className="mt-auto pt-6">
             {current ? (
@@ -134,7 +135,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
                 <button className="btn-primary w-full py-3 text-base">{eligible ? "Start 3-day free trial" : `Subscribe for $${price(b)}`}</button>
               </form>
             )}
-            <p className="mt-2 text-center text-xs text-ink-400">
+            <p className="mt-2 text-center text-xs text-muted">
               {eligible ? `Card required. Then $${price(b)}/${interval === "year" ? "yr" : "mo"} unless you cancel. One trial per account.` : "You've already used your free trial."}
             </p>
           </div>
@@ -142,14 +143,14 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
         {/* Clipper */}
         <div className="card relative flex flex-col p-6">
-          <span className="absolute -top-3 left-6 rounded-full border border-ink-600 bg-ink-800 px-2.5 py-0.5 text-xs font-bold text-ink-300">Coming soon</span>
+          <span className="absolute -top-3 left-6 rounded-full border border-border-strong bg-subtle px-2.5 py-0.5 text-xs font-bold text-fg-secondary">Coming soon</span>
           <h2 className="text-xl font-bold">{c.name}</h2>
-          <p className="mt-1 text-sm text-ink-400">{c.tagline}</p>
+          <p className="mt-1 text-sm text-muted">{c.tagline}</p>
           <p className="mt-5">
             <span className="text-4xl font-extrabold">${price(c)}</span>
-            <span className="text-ink-400">/{interval === "year" ? "year" : "month"}</span>
+            <span className="text-muted">/{interval === "year" ? "year" : "month"}</span>
           </p>
-          <ul className="mt-5 space-y-2 text-sm text-ink-300">
+          <ul className="mt-5 space-y-2 text-sm text-fg-secondary">
             <li>✓ Everything in Beginner, plus:</li>
             <li>✓ {c.limits.clips_monthly} uploads &amp; {c.limits.submissions_monthly} submissions / month</li>
             <li>✓ {c.limits.saved_channels} saved channels, unlimited notes</li>
@@ -172,7 +173,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
             ) : (
               <>
                 <WaitlistForm signedInEmail={user?.email} />
-                <p className="mt-2 text-center text-xs text-ink-400">Not charged until launch.</p>
+                <p className="mt-2 text-center text-xs text-muted">Not charged until launch.</p>
               </>
             )}
           </div>
@@ -181,9 +182,9 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         {/* Custom */}
         <div className="card flex flex-col p-6">
           <h2 className="text-xl font-bold">Custom</h2>
-          <p className="mt-1 text-sm text-ink-400">{PLANS.custom.tagline}</p>
+          <p className="mt-1 text-sm text-muted">{PLANS.custom.tagline}</p>
           <p className="mt-5 text-4xl font-extrabold">Let&apos;s talk</p>
-          <ul className="mt-5 space-y-2 text-sm text-ink-300">
+          <ul className="mt-5 space-y-2 text-sm text-fg-secondary">
             <li>✓ Custom limits for every metric</li>
             <li>✓ Multiple seats for your team</li>
             <li>✓ More accounts per platform</li>
@@ -200,7 +201,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
-              <tr className="border-b border-ink-700 text-ink-400">
+              <tr className="border-b border-border text-muted">
                 <th className="p-3 font-medium">Feature</th>
                 <th className="p-3 font-medium">Beginner</th>
                 <th className="p-3 font-medium">Clipper <span className="text-xs">(soon)</span></th>
@@ -209,19 +210,19 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
             </thead>
             <tbody>
               {ROWS.map((r) => (
-                <tr key={r.label} className="border-b border-ink-800 last:border-0">
-                  <td className="p-3 text-ink-300">{r.label}</td>
+                <tr key={r.label} className="border-b border-border-subtle last:border-0">
+                  <td className="p-3 text-fg-secondary">{r.label}</td>
                   {(["beginner", "clipper", "custom"] as const).map((p) => (
                     <td key={p} className="p-3">
                       {r.metric
                         ? p === "custom"
                           ? "Custom"
                           : PLANS[p].limits[r.metric] === 0
-                            ? <span className="text-ink-400">—</span>
+                            ? <span className="text-muted">—</span>
                             : fmtLimit(PLANS[p].limits[r.metric])
                         : PLANS[p].features.includes(r.feature!)
-                          ? <span className="text-lane-400">✓</span>
-                          : <span className="text-ink-400">—</span>}
+                          ? <span className="text-primary-strong">✓</span>
+                          : <span className="text-muted">—</span>}
                     </td>
                   ))}
                 </tr>
@@ -231,31 +232,31 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
       </section>
 
-      <section className="mt-14 grid gap-8 lg:grid-cols-2">
+      <section className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h2 className="mb-4 text-2xl font-bold">FAQ</h2>
           <div className="space-y-2">
             {FAQ.map(([qn, a]) => (
               <details key={qn} className="card group p-4">
                 <summary className="cursor-pointer list-none font-medium">
-                  <span className="mr-2 inline-block text-lane-400 transition group-open:rotate-90">›</span>
+                  <span className="mr-2 inline-block text-primary-strong transition group-open:rotate-90">›</span>
                   {qn}
                 </summary>
-                <p className="mt-2 text-sm text-ink-300">{a}</p>
+                <p className="mt-2 text-sm text-fg-secondary">{a}</p>
               </details>
             ))}
           </div>
         </div>
         <div id="custom" className="scroll-mt-6">
           <h2 className="mb-1 text-2xl font-bold">Contact sales</h2>
-          <p className="mb-4 text-sm text-ink-400">Tell us about your team and we&apos;ll set up a Custom plan.</p>
+          <p className="mb-4 text-sm text-muted">Tell us about your team and we&apos;ll set up a Custom plan.</p>
           <div className="card p-5">
             <ContactSalesForm defaultName={user?.name ?? undefined} defaultEmail={user?.email ?? undefined} />
           </div>
         </div>
       </section>
 
-      <footer className="mt-16 border-t border-ink-800 pt-6 text-xs text-ink-400">Prices in USD. Taxes may apply. CutLane is not affiliated with Whop.</footer>
+      <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">Prices in USD. Taxes may apply. CutLane is not affiliated with Whop.</footer>
     </div>
   );
 }

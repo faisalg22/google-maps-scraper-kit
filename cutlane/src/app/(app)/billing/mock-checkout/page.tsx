@@ -23,18 +23,18 @@ export default async function MockCheckout({ searchParams }: { searchParams: Pro
     <div className="mx-auto max-w-md">
       <div className="card p-6">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-ink-400">Checkout</p>
+          <p className="text-sm text-muted">Checkout</p>
           <DemoTag label="Test mode: no charge" />
         </div>
         <h1 className="mt-3 text-2xl font-bold">CutLane {p.name}</h1>
-        <p className="mt-1 text-ink-300">
+        <p className="mt-1 text-fg-secondary">
           {withTrial ? (
             <>3 days free, then <strong>${amount}/{interval === "year" ? "year" : "month"}</strong></>
           ) : (
             <><strong>${amount}</strong> per {interval === "year" ? "year" : "month"}</>
           )}
         </p>
-        <div className="mt-5 rounded-xl border border-dashed border-ink-600 bg-ink-900 p-4 text-sm text-ink-400">
+        <div className="mt-5 rounded-xl border border-dashed border-border-strong bg-surface p-4 text-sm text-muted">
           In live mode this is Stripe Checkout, which asks for a card up front{withTrial ? " (not charged until the trial ends)" : ""}. No card details are collected in test mode.
         </div>
         <form action={mockCompleteCheckout} className="mt-5 space-y-2">

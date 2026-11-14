@@ -48,14 +48,14 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
             {(Object.keys(CATEGORIES) as Category[]).map((k) => (
               <label key={k} className="cursor-pointer">
                 <input type="radio" name="cat" value={k} defaultChecked={(cat ?? "podcasts") === k} className="peer sr-only" />
-                <span className="chip px-3.5 py-1.5 text-sm peer-checked:border-lane-400 peer-checked:bg-lane-400/10 peer-checked:text-lane-400 peer-focus-visible:outline-2 peer-focus-visible:outline-lane-400">
+                <span className="chip px-3.5 py-1.5 text-sm peer-checked:border-primary-strong peer-checked:bg-primary-strong/10 peer-checked:text-primary-strong peer-focus-visible:outline-2 peer-focus-visible:outline-ring">
                   {CATEGORIES[k].label}
                 </span>
               </label>
             ))}
           </div>
         </fieldset>
-        <div className="grid gap-3 sm:grid-cols-[1fr_180px_auto]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_180px_auto]">
           <div>
             <label className="label" htmlFor="q">Topic or niche (optional)</label>
             <input id="q" name="q" defaultValue={query} placeholder="e.g. comedy, fitness, finance, Valorant" className="input" />
@@ -73,7 +73,7 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
           </div>
         </div>
         {modes.youtube && (
-          <p className="text-xs text-ink-400">
+          <p className="text-xs text-muted">
             YouTube quota today: {used.toLocaleString()} / {DAILY_QUOTA.toLocaleString()} units. A new search costs about 101 units; results are cached for 24 hours.
           </p>
         )}
@@ -81,18 +81,18 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
 
       <section className="mb-6">
         <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-400">Saved channels</h2>
-          <span className={`font-mono text-xs ${savedLimit !== null && saved.length >= savedLimit ? "text-red-300" : savedLimit !== null && saved.length >= savedLimit * 0.8 ? "text-amber-300" : "text-ink-400"}`}>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Saved channels</h2>
+          <span className={`font-mono text-xs ${savedLimit !== null && saved.length >= savedLimit ? "text-danger" : savedLimit !== null && saved.length >= savedLimit * 0.8 ? "text-warning" : "text-muted"}`}>
             {saved.length} / {savedLimit ?? "∞"}
           </span>
         </div>
         {saved.length === 0 ? (
-          <p className="text-sm text-ink-400">Save channels you study often. Open a channel and tap “Save channel”.</p>
+          <p className="text-sm text-muted">Save channels you study often. Open a channel and tap “Save channel”.</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {saved.map((c) => (
-              <Link key={c.channel_id} href={`/research/channel/${encodeURIComponent(c.channel_id)}`} className="chip px-3 py-1.5 text-sm hover:text-ink-100">
-                ★ {c.title} <span className="text-ink-400">{compactNumber(Number(c.subscribers))}</span>
+              <Link key={c.channel_id} href={`/research/channel/${encodeURIComponent(c.channel_id)}`} className="chip px-3 py-1.5 text-sm hover:text-fg">
+                ★ {c.title} <span className="text-muted">{compactNumber(Number(c.subscribers))}</span>
               </Link>
             ))}
           </div>
@@ -102,11 +102,11 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
       {error && <Alert kind="error">{error}</Alert>}
 
       {!cat && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {(Object.keys(CATEGORIES) as Category[]).map((k) => (
-            <Link key={k} href={`/research?cat=${k}`} className="card p-5 transition hover:border-ink-600">
+            <Link key={k} href={`/research?cat=${k}`} className="card p-5 transition hover:border-border-strong">
               <p className="font-semibold">{CATEGORIES[k].label}</p>
-              <p className="mt-1 text-sm text-ink-400">Browse top {CATEGORIES[k].label.toLowerCase()} channels →</p>
+              <p className="mt-1 text-sm text-muted">Browse top {CATEGORIES[k].label.toLowerCase()} channels →</p>
             </Link>
           ))}
         </div>
@@ -118,27 +118,27 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
 
       {result && result.channels.length > 0 && (
         <>
-          <p className="mb-3 text-sm text-ink-400">
+          <p className="mb-3 text-sm text-muted">
             {result.channels.length} channel{result.channels.length === 1 ? "" : "s"}
             {result.hiddenOrSmall > 0 && ` · ${result.hiddenOrSmall} hidden (under ${compactNumber(minSubs)} or subscriber count hidden)`}
             {result.fromCache && " · from cache"}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {result.channels.map((ch) => (
-              <Link key={ch.id} href={`/research/channel/${encodeURIComponent(ch.id)}`} className="card flex gap-3 p-4 transition hover:border-ink-600">
+              <Link key={ch.id} href={`/research/channel/${encodeURIComponent(ch.id)}`} className="card flex gap-3 p-4 transition hover:border-border-strong">
                 {ch.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ch.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded-full object-cover" loading="lazy" />
+                  <img src={ch.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded-full bg-subtle object-cover" loading="lazy" />
                 ) : (
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ink-600 to-ink-800 text-lg font-bold">{ch.title.slice(0, 1)}</span>
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-border to-subtle text-lg font-bold">{ch.title.slice(0, 1)}</span>
                 )}
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <p className="truncate font-semibold">{ch.title}</p>
                     {ch.isDemo && <DemoTag label="Demo" />}
                   </div>
-                  <p className="text-sm text-lane-400">{compactNumber(ch.subscribers)} subscribers</p>
-                  <p className="mt-1 line-clamp-2 text-xs text-ink-400">{ch.description || "No description."}</p>
+                  <p className="text-sm text-primary-strong">{compactNumber(ch.subscribers)} subscribers</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-muted">{ch.description || "No description."}</p>
                 </div>
               </Link>
             ))}

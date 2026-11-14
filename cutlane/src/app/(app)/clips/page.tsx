@@ -18,7 +18,7 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
       <PageHeader title="Clip library" subtitle="Finished clips, ready to post and submit." actions={ent.canWrite ? <Link href="/clips/new" className="btn-primary">Import clip</Link> : <Link href="/billing" className="btn-secondary">Update billing to import</Link>} />
       <div className="mb-4 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
-          <Link key={f} href={f === "all" ? "/clips" : `/clips?status=${f}`} className={`chip px-3 py-1 ${(status ?? "all") === f ? "border-lane-400 text-lane-400" : ""}`}>
+          <Link key={f} href={f === "all" ? "/clips" : `/clips?status=${f}`} className={`chip px-3 py-1 ${(status ?? "all") === f ? "border-primary-strong text-primary-strong" : ""}`}>
             {f[0].toUpperCase() + f.slice(1)}
           </Link>
         ))}
@@ -26,17 +26,17 @@ export default async function ClipsPage({ searchParams }: { searchParams: Promis
       {clips.length === 0 ? (
         <EmptyState title={status ? `No ${status} clips` : "No clips yet"} body="Import a finished MP4 and link it to a campaign to start the post → submit flow." action={<Link href="/clips/new" className="btn-primary">Import your first clip</Link>} />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {clips.map((c) => (
-            <Link key={c.id} href={`/clips/${c.id}`} className="card flex gap-3 p-3 transition hover:border-ink-600">
-              <div className="flex aspect-[9/16] w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-ink-700 to-ink-900 text-ink-400">▶</div>
+            <Link key={c.id} href={`/clips/${c.id}`} className="card flex gap-3 p-3 transition hover:border-border-strong">
+              <div className="flex aspect-[9/16] w-16 shrink-0 items-center justify-center rounded-lg bg-gradient-to-b from-subtle-strong to-surface text-muted">▶</div>
               <div className="min-w-0 flex-1 py-0.5">
                 <div className="flex items-start justify-between gap-2">
                   <p className="line-clamp-2 text-sm font-semibold">{c.title}</p>
                   <StatusBadge status={c.status} />
                 </div>
-                <p className="mt-1 truncate text-xs text-ink-400">{c.campaign_title ?? "No campaign linked"}</p>
-                <p className="mt-1 text-xs text-ink-400">
+                <p className="mt-1 truncate text-xs text-muted">{c.campaign_title ?? "No campaign linked"}</p>
+                <p className="mt-1 text-xs text-muted">
                   {formatBytes(c.size_bytes)} · {formatDate(c.created_at)}
                 </p>
               </div>

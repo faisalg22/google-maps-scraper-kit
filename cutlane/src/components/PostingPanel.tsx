@@ -14,10 +14,10 @@ const PLACEHOLDER: Record<Platform, string> = {
 };
 
 const CHECK_UI: Record<PostLink["check_status"], { label: string; cls: string }> = {
-  unchecked: { label: "Not checked", cls: "text-ink-400" },
-  ok: { label: "Loads publicly", cls: "text-emerald-300" },
-  blocked: { label: "Couldn't verify automatically", cls: "text-amber-300" },
-  failed: { label: "Not reachable", cls: "text-red-300" },
+  unchecked: { label: "Not checked", cls: "text-muted" },
+  ok: { label: "Loads publicly", cls: "text-success" },
+  blocked: { label: "Couldn't verify automatically", cls: "text-warning" },
+  failed: { label: "Not reachable", cls: "text-danger" },
 };
 
 export function PostingPanel({ clipId, platform, link, locked }: { clipId: string; platform: Platform; link: PostLink | null; locked: boolean }) {
@@ -36,22 +36,22 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4">
         <div className="min-w-0">
           <p className="font-semibold">{PLATFORM_LABELS[platform]}</p>
-          <p className="truncate text-xs text-ink-400">{link?.url ? link.url : `${done}/${steps.length} steps done`}</p>
+          <p className="truncate text-xs text-muted">{link?.url ? link.url : `${done}/${steps.length} steps done`}</p>
         </div>
         <div className="flex items-center gap-2">
           {link?.url && <span className={`text-xs font-medium ${CHECK_UI[link.check_status].cls}`}>{CHECK_UI[link.check_status].label}</span>}
-          <span aria-hidden className="text-ink-400 transition group-open:rotate-180">⌄</span>
+          <span aria-hidden className="text-muted transition group-open:rotate-180">⌄</span>
         </div>
       </summary>
 
-      <div className="space-y-4 border-t border-ink-700 p-4">
+      <div className="space-y-4 border-t border-border p-4">
         <ul className="space-y-2">
           {steps.map((s) => (
             <li key={s.id}>
               <label className="flex cursor-pointer gap-3 text-sm">
                 <input
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-lane-400"
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-primary-strong"
                   checked={Boolean(checklist[s.id])}
                   disabled={locked}
                   onChange={(e) => {
@@ -62,7 +62,7 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
                     });
                   }}
                 />
-                <span className={checklist[s.id] ? "text-ink-300 line-through decoration-ink-600" : ""}>{s.label}</span>
+                <span className={checklist[s.id] ? "text-fg-secondary line-through decoration-border-strong" : ""}>{s.label}</span>
               </label>
             </li>
           ))}
@@ -85,22 +85,22 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
               {saving ? "Checking…" : link?.url ? "Update" : "Save link"}
             </button>
           </div>
-          {!complete && !link?.url && <p className="text-xs text-ink-400">Tip: tick off the checklist before you post.</p>}
+          {!complete && !link?.url && <p className="text-xs text-muted">Tip: tick off the checklist before you post.</p>}
           <ActionFeedback state={state} />
         </form>
 
         {link?.url && (
-          <div className="space-y-2 rounded-xl bg-ink-900/70 p-3 text-sm">
+          <div className="space-y-2 rounded-xl bg-surface/70 p-3 text-sm">
             <p className={CHECK_UI[link.check_status].cls}>
               {CHECK_UI[link.check_status].label}
               {link.check_http_status ? ` · HTTP ${link.check_http_status}` : ""}
             </p>
-            {link.check_message && <p className="text-xs text-ink-400">{link.check_message}</p>}
+            {link.check_message && <p className="text-xs text-muted">{link.check_message}</p>}
             {link.check_status === "blocked" && (
               <label className="flex gap-2 text-xs">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-lane-400"
+                  className="h-4 w-4 accent-primary-strong"
                   checked={link.manual_confirmed}
                   disabled={locked || busy}
                   onChange={(e) => {

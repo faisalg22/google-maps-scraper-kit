@@ -5,6 +5,8 @@ import { modes } from "@/lib/env";
 import { safeReturnTo } from "@/lib/whop/oauth";
 import { demoSignIn } from "./actions";
 import { Alert, CopyrightNotice, DemoTag } from "@/components/ui";
+import { Logo } from "@/components/Brand";
+import { ThemeToggle } from "@/components/theme";
 
 const ERRORS: Record<string, string> = {
   access_denied: "You cancelled the Whop sign-in.",
@@ -33,23 +35,22 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="relative min-h-dvh overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-lane-400/10 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-primary-strong/10 blur-3xl" />
       <div className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <header className="flex items-center justify-between">
-          <span className="text-lg font-bold tracking-tight">
-            Cut<span className="text-lane-400">Lane</span>
-          </span>
+          <Logo href="/" />
           <div className="flex items-center gap-3">
-            <Link href="/pricing" className="text-sm text-ink-300 hover:text-ink-100">Pricing</Link>
+            <Link href="/pricing" className="text-sm text-fg-secondary hover:text-fg">Pricing</Link>
             {!modes.whop && <DemoTag label="Demo mode" />}
+            <ThemeToggle compact />
           </div>
         </header>
 
         <section className="mt-14 max-w-2xl sm:mt-20">
           <h1 className="text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-            From campaign to <span className="text-lane-400">approved clip</span> in one lane.
+            From campaign to <span className="text-primary-strong">approved clip</span> in one lane.
           </h1>
-          <p className="mt-5 text-lg text-ink-300">
+          <p className="mt-5 text-lg text-fg-secondary">
             CutLane is the workspace for editors clipping Whop Content Rewards campaigns: research hooks on YouTube, import your clips, post them,
             capture the links and submit them to Whop without switching tabs.
           </p>
@@ -65,7 +66,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
               </form>
             )}
             <Link href="/pricing" className="btn-ghost">See pricing</Link>
-            <span className="text-sm text-ink-400">
+            <span className="text-sm text-muted">
               {modes.whop ? "Uses your own Whop account (OAuth 2.1 + PKCE). Tokens stay on our server." : "Whop isn't configured yet, so you'll use mock campaigns."}
             </span>
           </div>
@@ -81,12 +82,12 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
           )}
         </section>
 
-        <section className="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {steps.map(([title, body], i) => (
             <div key={title} className="card p-5">
-              <p className="font-mono text-xs text-lane-400">0{i + 1}</p>
+              <p className="font-mono text-xs text-primary-strong">0{i + 1}</p>
               <p className="mt-2 font-semibold">{title}</p>
-              <p className="mt-1 text-sm text-ink-400">{body}</p>
+              <p className="mt-1 text-sm text-muted">{body}</p>
             </div>
           ))}
         </section>
@@ -95,7 +96,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
           <CopyrightNotice />
         </section>
 
-        <footer className="mt-16 border-t border-ink-800 pt-6 text-xs text-ink-400">
+        <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">
           CutLane is not affiliated with Whop, YouTube, Instagram or TikTok. <Link href="/pricing" className="underline">Pricing</Link>
         </footer>
       </div>

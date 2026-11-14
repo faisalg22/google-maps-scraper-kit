@@ -38,18 +38,18 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
           {[...groups.entries()].map(([videoId, g]) => (
             <section key={videoId} className="card p-4">
               <Link href={`/research/video/${encodeURIComponent(videoId)}`} className="group block">
-                <p className="font-semibold group-hover:text-white">{g.title}</p>
-                {g.channel && <p className="text-xs text-ink-400">{g.channel}</p>}
+                <p className="font-semibold group-hover:text-fg">{g.title}</p>
+                {g.channel && <p className="text-xs text-muted">{g.channel}</p>}
               </Link>
               <ul className="mt-3 space-y-2">
                 {g.notes
                   .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)
                   .map((n) => (
-                    <li key={n.id} className="flex gap-3 rounded-xl bg-ink-900/70 p-3">
-                      <span className="h-fit rounded-md bg-ink-700 px-1.5 py-0.5 font-mono text-xs text-lane-400">{formatDuration(n.timestamp_seconds)}</span>
+                    <li key={n.id} className="flex gap-3 rounded-xl bg-surface/70 p-3">
+                      <span className="h-fit rounded-md bg-subtle-strong px-1.5 py-0.5 font-mono text-xs text-primary-strong">{formatDuration(n.timestamp_seconds)}</span>
                       <div className="min-w-0 flex-1">
                         <p className="whitespace-pre-wrap break-words text-sm">{n.note}</p>
-                        <p className="mt-1 text-xs text-ink-400">
+                        <p className="mt-1 text-xs text-muted">
                           {n.tags.map((t) => `#${t.replace(/\s+/g, "-")}`).join(" ")} {n.tags.length > 0 && "· "}
                           {formatDate(n.created_at)}
                         </p>

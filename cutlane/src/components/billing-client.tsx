@@ -8,14 +8,14 @@ import { ActionFeedback } from "./billing";
 
 export function ContactSalesForm({ defaultName, defaultEmail }: { defaultName?: string; defaultEmail?: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(submitSalesLead, null);
-  if (state?.ok) return <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 p-4 text-sm text-emerald-200">{state.message}</p>;
+  if (state?.ok) return <p className="rounded-xl border border-success/30 bg-success/10 p-4 text-sm text-success">{state.message}</p>;
   return (
     <form action={action} className="space-y-3">
       {/* Honeypot (hidden from people, filled by bots) */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label>Company website<input name="company_website" tabIndex={-1} autoComplete="off" /></label>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className="label" htmlFor="lead-name">Name</label>
           <input id="lead-name" name="name" required maxLength={120} defaultValue={defaultName} className="input" autoComplete="name" />
@@ -50,7 +50,7 @@ export function ContactSalesForm({ defaultName, defaultEmail }: { defaultName?: 
 
 export function WaitlistForm({ signedInEmail }: { signedInEmail?: string | null }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(joinWaitlist, null);
-  if (state?.ok) return <p className="text-sm text-emerald-300">{state.message}</p>;
+  if (state?.ok) return <p className="text-sm text-success">{state.message}</p>;
   return (
     <form action={action} className="space-y-2">
       {!signedInEmail && <input name="email" type="email" required placeholder="you@example.com" className="input" aria-label="Email for the Clipper waitlist" />}
@@ -113,7 +113,7 @@ export function AddAccountForm({ platforms }: { platforms: { id: string; label: 
   const [state, action, pending] = useActionState<ActionState, FormData>(addSocialAccount, null);
   return (
     <form action={action} className="space-y-3">
-      <div className="grid gap-3 sm:grid-cols-[180px_1fr_auto]">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[180px_1fr_auto]">
         <select name="platform" className="input" aria-label="Platform">
           {platforms.map((p) => (
             <option key={p.id} value={p.id}>{p.label}</option>
