@@ -1,0 +1,35 @@
+{
+  "name": "cutlane",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CutLane — one platform for editors clipping Whop Content Rewards campaigns",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
+    "keygen": "node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\""
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@supabase/supabase-js": "^2.119.0",
+    "next": "^15.5.29",
+    "postgres": "^4.1.1",
+    "react": "^19.1.10",
+    "react-dom": "^19.1.10",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "5.9",
+    "vitest": "^5.1.0"
+  }
+}
