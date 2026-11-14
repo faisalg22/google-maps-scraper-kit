@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { addSwipeNote, deleteSwipeNote } from "@/app/actions";
 import { formatDuration, parseTimestamp } from "@/lib/youtube/core";
 import type { SwipeNote } from "@/lib/repo";
+import type { ActionState } from "@/lib/action-errors";
+import { UpgradePrompt } from "./billing";
 
 interface VideoInfo {
   id: string;
@@ -128,6 +130,7 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
   const [note, setNote] = useState("");
   const [tags, setTags] = useState<string[]>(["hook"]);
   const [error, setError] = useState<string | null>(null);
+  const [upgrade, setUpgrade] = useState<NonNullable<ActionState>["upgrade"]>(undefined);
   const [pending, start] = useTransition();
   const onReady = useCallback((h: PlayerHandle) => (handle.current = h), []);
 
@@ -150,7 +153,9 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
         note: note.trim(),
         tags,
       });
+      if (res.upgrade) return setUpgrade(res.upgrade);
       if (res.error) return setError(res.error);
+      setUpgrade(undefined);
       setNote("");
       router.refresh();
     });
@@ -194,6 +199,7 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
             ))}
           </div>
           {error && <p className="text-sm text-red-300">{error}</p>}
+          {upgrade && <UpgradePrompt upgrade={upgrade} />}
           <button disabled={pending} className="btn-primary w-full">
             {pending ? "Saving…" : "Save to swipe file"}
           </button>

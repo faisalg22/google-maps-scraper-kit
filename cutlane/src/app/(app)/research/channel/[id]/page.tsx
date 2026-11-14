@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { getChannel, getChannelVideos } from "@/lib/youtube/api";
 import { compactNumber, formatDuration, isChannelId } from "@/lib/youtube/core";
 import { Alert, BackLink, DemoTag, EmptyState, formatDate } from "@/components/ui";
+import { SaveChannelButton } from "@/components/billing-client";
+import { one } from "@/lib/db";
 
 const SORTS = { views: "Most viewed", recent: "Newest", likes: "Most liked", ratio: "Best like rate" } as const;
 type Sort = keyof typeof SORTS;
 const LENGTHS = [10, 20, 40, 60];
 
 export default async function ChannelPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | undefined>> }) {
-  await requireUser();
+  const billing = await requirePageAccess("write");
   const { id: rawId } = await params;
   const id = decodeURIComponent(rawId);
   if (!id.startsWith("demo-") && !isChannelId(id)) notFound();
@@ -31,6 +33,9 @@ export default async function ChannelPage({ params, searchParams }: { params: Pr
     if (sort === "ratio") return (b.likes ?? 0) / Math.max(1, b.views) - (a.likes ?? 0) / Math.max(1, a.views);
     return b.views - a.views;
   });
+  const isSaved = channel
+    ? Boolean(await one(`select 1 from saved_channels where workspace_id = $1 and channel_id = $2`, [billing.workspace.id, channel.id]))
+    : false;
   const qs = (patch: Record<string, string>) => `?${new URLSearchParams({ sort, len: String(minMin), ...patch })}`;
 
   return (
@@ -60,6 +65,13 @@ export default async function ChannelPage({ params, searchParams }: { params: Pr
                 YouTube ↗
               </a>
             )}
+          </div>
+
+          <div className="mt-4">
+            <SaveChannelButton
+              channel={{ channelId: channel.id, title: channel.title, thumbnail: channel.thumbnail, subscribers: channel.subscribers }}
+              saved={isSaved}
+            />
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2 text-sm">

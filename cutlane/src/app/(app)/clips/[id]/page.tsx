@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { modes } from "@/lib/env";
 import { getClip, linkIsSubmittable, listClipSubmissions, listPostLinks } from "@/lib/repo";
 import { getCampaign } from "@/lib/whop/campaigns";
@@ -12,7 +12,7 @@ import { ClipSettings } from "@/components/ClipSettings";
 import { BackLink, CopyrightNotice, StatusBadge, formatBytes, formatDate } from "@/components/ui";
 
 export default async function ClipPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireUser();
+  const { user, ent } = await requirePageAccess("read");
   const { id } = await params;
   const clip = await getClip(user.id, id);
   if (!clip) notFound();
@@ -31,7 +31,8 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
   }
   if (activeSub) blockers.push(activeSub.status === "approved" ? "Already approved." : "Already submitted and waiting for review.");
   const canAttach = !campaign || campaign.deliverableTypes.length === 0 || campaign.deliverableTypes.includes("media");
-  const locked = Boolean(activeSub);
+  if (!ent.canWrite) blockers.unshift("Your plan is restricted. Update billing to post and submit.");
+  const locked = Boolean(activeSub) || !ent.canWrite;
 
   return (
     <div className="mx-auto max-w-6xl">

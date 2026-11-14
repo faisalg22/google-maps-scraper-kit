@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { getCampaign } from "@/lib/whop/campaigns";
 import { GOAL_LABELS, PLATFORM_LABELS, formatMoney } from "@/lib/whop/campaigns-core";
 import { listClips } from "@/lib/repo";
@@ -24,7 +24,7 @@ function Linkified({ text }: { text: string }) {
 }
 
 export default async function CampaignDetail({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireUser();
+  const { user } = await requirePageAccess("write");
   const { id } = await params;
   const c = await getCampaign(user.id, decodeURIComponent(id));
   if (!c) notFound();

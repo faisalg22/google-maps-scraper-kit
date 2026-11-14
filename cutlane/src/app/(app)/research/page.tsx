@@ -1,16 +1,17 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { modes } from "@/lib/env";
 import { DAILY_QUOTA, quotaUsedToday, searchChannels } from "@/lib/youtube/api";
 import { CATEGORIES, MIN_SUBSCRIBERS, compactNumber, isCategory, type Category } from "@/lib/youtube/core";
 import { Alert, DemoTag, EmptyState, PageHeader } from "@/components/ui";
+import { q } from "@/lib/db";
 
 export const metadata = { title: "YouTube research" };
 
 const SUB_OPTIONS = [50_000, 100_000, 500_000, 1_000_000];
 
 export default async function ResearchPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  await requireUser();
+  const billing = await requirePageAccess("write");
   const sp = await searchParams;
   const cat: Category | null = sp.cat && isCategory(sp.cat) ? sp.cat : null;
   const query = (sp.q ?? "").slice(0, 100);
@@ -26,6 +27,11 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
     }
   }
   const used = modes.youtube ? await quotaUsedToday() : 0;
+  const saved = await q<{ channel_id: string; title: string; subscribers: number }>(
+    `select channel_id, title, subscribers::float8 as subscribers from saved_channels where workspace_id = $1 order by created_at desc`,
+    [billing.workspace.id],
+  );
+  const savedLimit = billing.ent.limits.saved_channels;
 
   return (
     <>
@@ -72,6 +78,26 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
           </p>
         )}
       </form>
+
+      <section className="mb-6">
+        <div className="mb-2 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-400">Saved channels</h2>
+          <span className={`font-mono text-xs ${savedLimit !== null && saved.length >= savedLimit ? "text-red-300" : savedLimit !== null && saved.length >= savedLimit * 0.8 ? "text-amber-300" : "text-ink-400"}`}>
+            {saved.length} / {savedLimit ?? "∞"}
+          </span>
+        </div>
+        {saved.length === 0 ? (
+          <p className="text-sm text-ink-400">Save channels you study often. Open a channel and tap “Save channel”.</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {saved.map((c) => (
+              <Link key={c.channel_id} href={`/research/channel/${encodeURIComponent(c.channel_id)}`} className="chip px-3 py-1.5 text-sm hover:text-ink-100">
+                ★ {c.title} <span className="text-ink-400">{compactNumber(Number(c.subscribers))}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
       {error && <Alert kind="error">{error}</Alert>}
 

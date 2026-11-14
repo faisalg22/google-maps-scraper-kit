@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { listClips } from "@/lib/repo";
 import { EmptyState, PageHeader, StatusBadge, formatBytes, formatDate } from "@/components/ui";
 
@@ -8,14 +8,14 @@ export const metadata = { title: "Clip library" };
 const FILTERS = ["all", "ready", "posted", "submitted", "approved", "rejected"] as const;
 
 export default async function ClipsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const user = await requireUser();
+  const { user, ent } = await requirePageAccess("read");
   const sp = await searchParams;
   const status = FILTERS.includes(sp.status as (typeof FILTERS)[number]) && sp.status !== "all" ? sp.status : undefined;
   const clips = await listClips(user.id, status);
 
   return (
     <>
-      <PageHeader title="Clip library" subtitle="Finished clips, ready to post and submit." actions={<Link href="/clips/new" className="btn-primary">Import clip</Link>} />
+      <PageHeader title="Clip library" subtitle="Finished clips, ready to post and submit." actions={ent.canWrite ? <Link href="/clips/new" className="btn-primary">Import clip</Link> : <Link href="/billing" className="btn-secondary">Update billing to import</Link>} />
       <div className="mb-4 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Link key={f} href={f === "all" ? "/clips" : `/clips?status=${f}`} className={`chip px-3 py-1 ${(status ?? "all") === f ? "border-lane-400 text-lane-400" : ""}`}>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { listSwipeNotes } from "@/lib/repo";
 import { formatDuration } from "@/lib/youtube/core";
 import { EmptyState, PageHeader, formatDate } from "@/components/ui";
@@ -7,7 +7,7 @@ import { EmptyState, PageHeader, formatDate } from "@/components/ui";
 export const metadata = { title: "Swipe file" };
 
 export default async function SwipePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const user = await requireUser();
+  const { user } = await requirePageAccess("read");
   const sp = await searchParams;
   const search = (sp.q ?? "").slice(0, 100);
   const notes = await listSwipeNotes(user.id, { search: search || undefined });

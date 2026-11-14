@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { submitClip, type ActionState } from "@/app/actions";
+import { ActionFeedback } from "./billing";
 
 export function SubmitPanel({
   clipId,
@@ -58,8 +59,7 @@ export function SubmitPanel({
         <p className="text-xs text-ink-400">This campaign accepts post links only, so the file isn&apos;t attached.</p>
       )}
 
-      {state?.error && <p className="text-sm text-red-300" role="alert">{state.error}</p>}
-      {state?.ok && <p className="text-sm text-emerald-300">{state.message}</p>}
+      <ActionFeedback state={state} />
 
       <button disabled={disabled} className="btn-primary w-full">
         {pending ? "Submitting… (uploading can take a minute)" : isDemo ? "Submit (demo)" : "Submit to Whop"}

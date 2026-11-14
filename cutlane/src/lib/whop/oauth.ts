@@ -54,7 +54,7 @@ export function readPkce(cookieValue: string | undefined): PkceState | null {
 
 /** Only allow same-origin relative paths as post-login destinations. */
 export function safeReturnTo(raw: string | null | undefined): string {
-  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return "/campaigns";
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.includes("\\")) return "/dashboard";
   return raw;
 }
 

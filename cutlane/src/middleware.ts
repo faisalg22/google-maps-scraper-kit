@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /** Cheap gate: app pages need a session cookie. The real check (DB lookup) happens in the (app) layout. */
-const PROTECTED = ["/campaigns", "/research", "/swipe", "/clips", "/submissions", "/status"];
+const PROTECTED = ["/dashboard", "/campaigns", "/research", "/swipe", "/clips", "/submissions", "/status", "/billing", "/settings", "/admin"];
 
 export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;

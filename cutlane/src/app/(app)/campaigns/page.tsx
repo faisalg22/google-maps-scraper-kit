@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { listCampaigns } from "@/lib/whop/campaigns";
 import { GOAL_LABELS, GOAL_TYPES, PLATFORM_LABELS, PLATFORMS, type CampaignFilters } from "@/lib/whop/campaigns-core";
 import { WhopAuthRequired } from "@/lib/whop/client";
@@ -23,7 +23,7 @@ function parseFilters(sp: SP): CampaignFilters {
 }
 
 export default async function CampaignsPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const user = await requireUser();
+  const { user } = await requirePageAccess("write");
   const sp = await searchParams;
   const filters = parseFilters(sp);
 

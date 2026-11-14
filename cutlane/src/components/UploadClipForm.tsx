@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClip, requestClipUpload } from "@/app/actions";
+import type { ActionState } from "@/lib/action-errors";
+import { UpgradePrompt } from "./billing";
 
 const MAX = 1024 * 1024 * 1024;
 
@@ -28,6 +30,7 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
   const [rights, setRights] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [upgrade, setUpgrade] = useState<NonNullable<ActionState>["upgrade"]>(undefined);
 
   useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
@@ -48,9 +51,16 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
     if (!title.trim()) return setError("Give the clip a title.");
     if (!rights) return setError("Confirm the footage rights.");
     setError(null);
+    setUpgrade(undefined);
     try {
       setProgress(0);
-      const { key, target } = await requestClipUpload({ fileName: file.name, size: file.size, mime: "video/mp4" });
+      const req = await requestClipUpload({ fileName: file.name, size: file.size, mime: "video/mp4" });
+      if (!("key" in req)) {
+        setProgress(null);
+        setUpgrade(req.upgrade);
+        return setError(req.upgrade ? null : (req.error ?? "Upload failed."));
+      }
+      const { key, target } = req;
       await putWithProgress(target.url, file, target.headers, setProgress);
       const campaign = campaigns.find((c) => c.id === campaignId);
       const res = await createClip({
@@ -61,6 +71,10 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
         campaignTitle: campaign?.title ?? null,
         rightsConfirmed: true,
       });
+      if (res.upgrade) {
+        setProgress(null);
+        return setUpgrade(res.upgrade);
+      }
       if (res.error || !res.id) throw new Error(res.error ?? "Could not save the clip.");
       router.push(`/clips/${res.id}`);
     } catch (err) {
@@ -131,6 +145,7 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
       </label>
 
       {error && <p className="text-sm text-red-300" role="alert">{error}</p>}
+      {upgrade && <UpgradePrompt upgrade={upgrade} />}
 
       {progress !== null && (
         <div className="h-2 overflow-hidden rounded-full bg-ink-800" aria-label="Upload progress">

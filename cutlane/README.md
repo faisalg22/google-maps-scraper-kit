@@ -24,6 +24,7 @@ Click **Enter the demo**. With no variables set, every integration runs in **dem
 | YouTube | Mock channels and videos with a simulated player, so hook notes still work |
 | Database | Embedded Postgres ([PGlite](https://pglite.dev)) in `./.data/pglite`, migrated automatically on start |
 | Storage | Uploaded clips go to `./.data/uploads` |
+| Billing | Test mode: simulated checkout and Stripe events, no charges. After **Enter the demo** you land on Pricing; start the trial to unlock the app |
 
 A yellow banner shows while anything is mocked. **/status** (sidebar → Integrations status) lists what is live and what is mocked.
 
@@ -45,6 +46,67 @@ Each integration switches to its **real API on its own** as soon as its variable
 > `DATABASE_URL` is one variable beyond the list in the brief. Supabase's JS client can't run raw SQL migrations or transactions, so the server talks to Postgres directly. The same SQL runs on the demo PGlite database and on Supabase.
 >
 > `SUPABASE_ANON_KEY` is accepted but unused in V1, because everything goes through the server. Row Level Security is **enabled with no policies** on every table, so the anon key can't read anything.
+
+## Billing (Stripe)
+
+There is **no free plan**. A signed-in user without a plan is sent to `/pricing`.
+
+| Plan | Price | Trial | Status |
+| --- | --- | --- | --- |
+| Beginner | $29/mo ($290/yr with annual flag) | 3 days, card required, one per account | Self-serve |
+| Clipper | $79/mo ($790/yr) | none | **Coming soon**: waitlist only, never charged while `CLIPPER_AVAILABLE=false` |
+| Custom | custom | none | "Contact sales" form → admin assigns limits + seats at `/admin` |
+
+All prices, limits, features and V2 caps (render minutes, AI cuts) live in **`src/config/plans.ts`**.
+
+### One entitlements helper
+
+`src/lib/billing/entitlements.ts` maps a subscription to **access, limits and features**. It's pure and fully unit-tested, and everything uses it through `src/lib/billing/server.ts`:
+
+- pages: `requirePageAccess("write" | "read")`
+- server actions and API routes: `assertCanWrite(feature)`, `consume(metric)` / `release()`, `assertTotalLimit(metric)`
+- UI: meters, banners and upgrade prompts
+
+| Access | When | What works |
+| --- | --- | --- |
+| full | trialing, active, canceling (until period end) | everything in the plan |
+| grace | payment failed < 3 days ago | everything, plus a red banner |
+| restricted | grace over, unpaid, paused, trial payment never landed | **read-only**: library, notes, submissions; no new work |
+| none | no plan, canceled, incomplete checkout | sent to pricing; data kept |
+
+**Limits.** Usage shows amber at 80%. At 100% the action is blocked with an upgrade prompt. Nothing is ever deleted: after a downgrade, data over the new limit stays but nothing new can be added.
+
+- **Monthly metrics** (`clips_monthly`, `submissions_monthly`, `render_minutes_monthly`, `ai_cuts_monthly`) use atomic counters keyed by the billing-period start. They reset on the billing date with no cron job, even on annual plans. Deleting a clip doesn't refund the unit. A submission unit is refunded if Whop rejects the call.
+- **Totals** (saved channels, notes, accounts per platform, seats) are counted live.
+
+### Stripe setup
+
+1. Stripe Dashboard (test mode first) → Products: create **Beginner** with a $29/month price and **Clipper** with a $79/month price. Optionally add $290/$790 yearly prices.
+2. Put the price IDs in `STRIPE_PRICE_*`, and set `STRIPE_SECRET_KEY`.
+3. Webhook endpoint: `https://YOUR_DOMAIN/api/stripe/webhook` with the events
+   `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`, `invoice.payment_failed`, `invoice.paid`.
+   Copy the signing secret to `STRIPE_WEBHOOK_SECRET`. Locally: `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+4. Customer Portal (Settings → Billing → Customer portal): allow updating the payment method, canceling at period end, and switching between your Beginner/Clipper prices.
+5. Recommended: Settings → Billing → Subscriptions → Smart Retries on, and "if all retries fail: mark the subscription as unpaid". CutLane's own 3-day grace rule applies either way.
+
+How it works:
+
+- **Checkout** uses `payment_method_collection: "always"`. Eligible accounts get a 3-day trial (`trial_period_days: 3`, cancel if no payment method).
+- **Webhooks** are signature-verified, de-duplicated by event ID, and protected against out-of-order delivery. A late cancel event for an old subscription never overwrites a newer one. Both period-field shapes are handled (on the subscription, or on its items as in API version 2025-03-31 and later).
+- **After checkout**, the success page syncs the subscription straight away instead of waiting for the webhook.
+
+**Test mode** (no Stripe keys): checkout is simulated, and `/billing` shows buttons that simulate the trial ending, a payment failing, the grace period expiring, the card being updated, cancelling and resuming. They go through the same subscription rules the webhooks use.
+
+### Flags and other variables
+
+| Variable | Effect |
+| --- | --- |
+| `BILLING_ANNUAL_ENABLED=true` | Monthly/annual toggle on pricing (needs `STRIPE_PRICE_*_ANNUAL` when live) |
+| `CLIPPER_AVAILABLE=true` | Clipper checkout + V2 features (editor, AI cuts, auto-post). Keep false until V2 ships |
+| `ADMIN_WHOP_USER_IDS` | Who can open `/admin` (in demo mode the demo account can) |
+| `RESEND_API_KEY`, `SALES_NOTIFY_EMAIL`, `SALES_FROM_EMAIL` | Email for "Contact sales". Leads are always saved; the email is skipped if unset |
+
+Seats are stored and enforced in entitlements (1 on Beginner/Clipper, admin-set on Custom). A team-invite flow isn't built yet.
 
 ## The first real Whop call
 
@@ -127,7 +189,7 @@ A clip can be submitted only when it is linked to an **open** campaign, its foot
 | Command | What it does |
 | --- | --- |
 | `npm run dev` / `build` / `start` | Next.js |
-| `npm test` | Unit tests (URL validation, field normalisation, encryption, durations) |
+| `npm test` | Unit tests (billing: trial/upgrade/downgrade/cancel/payment failure, usage counters on Postgres, webhook signatures; URL validation, field normalisation, encryption) |
 | `npm run lint` | Type-check |
 | `npm run db:migrate` | Apply `supabase/migrations/*.sql` to `DATABASE_URL` |
 | `npm run keygen` | Print a new 32-byte base64 key |

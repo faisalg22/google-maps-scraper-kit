@@ -45,6 +45,8 @@ export default async function StatusPage() {
 
       <section className="card px-5">
         <ul className="divide-y divide-ink-700">
+          <Row name="Stripe billing" live={modes.stripe} detail={modes.stripe ? `Checkout, Customer Portal and webhooks${env.stripe.webhookSecret ? "" : " (webhook secret missing!)"}. Annual: ${env.flags.annualBilling ? "on" : "off"}. Clipper checkout: ${env.flags.clipperAvailable ? "on" : "off"}.` : "Test mode: simulated checkout and billing events, no charges."} vars="STRIPE_SECRET_KEY · STRIPE_WEBHOOK_SECRET · STRIPE_PRICE_BEGINNER · STRIPE_PRICE_CLIPPER" />
+          <Row name="Sales email" live={modes.email} detail={modes.email ? "Contact-sales leads are emailed via Resend." : "Leads are saved to the database; email isn't sent."} vars="RESEND_API_KEY · SALES_NOTIFY_EMAIL" />
           <Row name="Whop" live={modes.whop} detail={modes.whop ? `Sign in with Whop, bounties and submissions. API version ${env.whop.apiVersionDate}. Scopes: ${env.whop.scopes}` : "Mock campaigns, demo sign-in and simulated submissions."} vars="WHOP_CLIENT_ID · WHOP_CLIENT_SECRET · WHOP_REDIRECT_URI" />
           <Row name="YouTube Data API" live={modes.youtube} detail={modes.youtube ? `Quota today: ${quota.toLocaleString()} / ${DAILY_QUOTA.toLocaleString()} units.` : "Mock channels and videos with a simulated player."} vars="YOUTUBE_API_KEY" />
           <Row name="Database" live={modes.database} detail={modes.database ? "Supabase Postgres via DATABASE_URL." : "Local embedded Postgres (PGlite) in ./.data/pglite."} vars="DATABASE_URL" />

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if (!env.tokenEncryptionKey) {
     return NextResponse.redirect(new URL("/?error=missing_encryption_key", env.appUrl));
   }
-  const { cookieValue, authorizeUrl } = newPkce(req.nextUrl.searchParams.get("returnTo") ?? "/campaigns");
+  const { cookieValue, authorizeUrl } = newPkce(req.nextUrl.searchParams.get("returnTo") ?? "/dashboard");
   const res = NextResponse.redirect(authorizeUrl);
   res.cookies.set(PKCE_COOKIE, cookieValue, {
     httpOnly: true,

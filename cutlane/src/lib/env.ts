@@ -32,6 +32,28 @@ export const env = {
     bucket: v("SUPABASE_CLIPS_BUCKET") ?? "clips",
   },
   databaseUrl: v("DATABASE_URL"),
+  stripe: {
+    secretKey: v("STRIPE_SECRET_KEY"),
+    webhookSecret: v("STRIPE_WEBHOOK_SECRET"),
+    prices: {
+      beginner: v("STRIPE_PRICE_BEGINNER"),
+      clipper: v("STRIPE_PRICE_CLIPPER"),
+      beginnerAnnual: v("STRIPE_PRICE_BEGINNER_ANNUAL"),
+      clipperAnnual: v("STRIPE_PRICE_CLIPPER_ANNUAL"),
+    },
+  },
+  flags: {
+    /** Annual billing (2 months free). Also needs the *_ANNUAL price IDs when Stripe is live. */
+    annualBilling: v("BILLING_ANNUAL_ENABLED") === "true",
+    /** Clipper checkout + V2 features (editor, AI cuts, auto-post). Off until V2 ships. */
+    clipperAvailable: v("CLIPPER_AVAILABLE") === "true",
+  },
+  email: {
+    resendApiKey: v("RESEND_API_KEY"),
+    salesNotify: v("SALES_NOTIFY_EMAIL"),
+    from: v("SALES_FROM_EMAIL") ?? "CutLane <no-reply@cutlane.io>",
+  },
+  adminWhopUserIds: (v("ADMIN_WHOP_USER_IDS") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
   tokenEncryptionKey: v("TOKEN_ENCRYPTION_KEY"),
   isProd: process.env.NODE_ENV === "production",
 };
@@ -53,12 +75,20 @@ export const modes = {
   get storage() {
     return Boolean(env.supabase.url && env.supabase.serviceRoleKey);
   },
+  /** Real Stripe Checkout/Portal/webhooks. Without it: test mode with mock plans. */
+  get stripe() {
+    return Boolean(env.stripe.secretKey && env.stripe.prices.beginner);
+  },
+  get email() {
+    return Boolean(env.email.resendApiKey && env.email.salesNotify);
+  },
   get anyDemo() {
-    return !this.whop || !this.youtube || !this.database || !this.storage;
+    return !this.whop || !this.youtube || !this.database || !this.storage || !this.stripe;
   },
 };
 
 export type PublicModes = {
+  stripe: boolean;
   whop: boolean;
   youtube: boolean;
   database: boolean;
@@ -69,6 +99,7 @@ export type PublicModes = {
 /** Safe to pass to client components: booleans only. */
 export function publicModes(): PublicModes {
   return {
+    stripe: modes.stripe,
     whop: modes.whop,
     youtube: modes.youtube,
     database: modes.database,
@@ -95,6 +126,18 @@ export function configWarnings(): string[] {
   }
   if (modes.whop && !modes.storage) {
     w.push("Whop is live but clips are stored on local disk. Set Supabase Storage variables for production.");
+  }
+  if (env.stripe.secretKey && !env.stripe.prices.beginner) {
+    w.push("STRIPE_SECRET_KEY is set but STRIPE_PRICE_BEGINNER is missing, so billing stays in test mode.");
+  }
+  if (modes.stripe && !env.stripe.webhookSecret) {
+    w.push("Stripe is live but STRIPE_WEBHOOK_SECRET is missing. Subscriptions won't update until webhooks are configured.");
+  }
+  if (modes.stripe && env.flags.annualBilling && !env.stripe.prices.beginnerAnnual) {
+    w.push("Annual billing is enabled but STRIPE_PRICE_BEGINNER_ANNUAL is missing; the annual option is hidden.");
+  }
+  if (modes.stripe && env.stripe.secretKey?.startsWith("sk_live") && !modes.whop) {
+    w.push("Live Stripe keys are set while Whop is in demo mode.");
   }
   if (env.isProd && !env.appUrl.startsWith("https://")) {
     w.push("APP_URL should be https:// in production.");

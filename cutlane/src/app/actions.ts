@@ -2,7 +2,7 @@
 
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { redirect, unstable_rethrow } from "next/navigation";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser, startSession, endSession, upsertUser } from "@/lib/auth/session";
 import { one, q, pgTextArray } from "@/lib/db";
@@ -14,17 +14,12 @@ import { checkPublicLink } from "@/lib/posting/linkcheck";
 import { PLATFORMS, type Platform } from "@/lib/whop/campaigns-core";
 import { getCampaign } from "@/lib/whop/campaigns";
 import { createSubmission, listMySubmissions, uploadClipToWhop } from "@/lib/whop/submissions";
-import { WhopAuthRequired } from "@/lib/whop/client";
 import { revokeAndDelete } from "@/lib/whop/oauth";
+import { toActionState, type ActionState } from "@/lib/action-errors";
+import { assertCanWrite, assertMonthlyHeadroom, assertTotalLimit, consume } from "@/lib/billing/server";
 
-export type ActionState = { ok?: boolean; error?: string; message?: string } | null;
+export type { ActionState };
 
-function errorMessage(err: unknown): string {
-  unstable_rethrow(err); // let redirect()/notFound() from requireUser propagate
-  if (err instanceof WhopAuthRequired) return err.message;
-  if (err instanceof z.ZodError) return err.issues[0]?.message ?? "Invalid input";
-  return err instanceof Error ? err.message : "Something went wrong";
-}
 
 // ── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -38,7 +33,7 @@ export async function demoSignIn() {
     isDemo: true,
   });
   await startSession(user.id);
-  redirect("/campaigns");
+  redirect("/dashboard");
 }
 
 export async function signOut() {
@@ -56,12 +51,21 @@ const uploadReq = z.object({
 });
 
 /** Step 1 of upload: a one-time signed PUT target scoped to this user. */
-export async function requestClipUpload(input: z.infer<typeof uploadReq>) {
-  const user = await requireUser();
-  const data = uploadReq.parse(input);
-  const key = `${user.id}/${crypto.randomUUID()}.mp4`;
-  const target = await createUploadTarget(key, data.mime);
-  return { key, target };
+export async function requestClipUpload(
+  input: z.infer<typeof uploadReq>,
+): Promise<{ key: string; target: Awaited<ReturnType<typeof createUploadTarget>> } | NonNullable<ActionState>> {
+  try {
+    const user = await requireUser();
+    const data = uploadReq.parse(input);
+    // Check headroom before the upload so nobody uploads 1 GB only to hit the limit.
+    await assertCanWrite("clip_import");
+    await assertMonthlyHeadroom("clips_monthly");
+    const key = `${user.id}/${crypto.randomUUID()}.mp4`;
+    const target = await createUploadTarget(key, data.mime);
+    return { key, target };
+  } catch (err) {
+    return toActionState(err);
+  }
 }
 
 const createClipReq = z.object({
@@ -74,28 +78,35 @@ const createClipReq = z.object({
 });
 
 /** Step 2 of upload: record the clip once the bytes are in storage. */
-export async function createClip(input: z.infer<typeof createClipReq>): Promise<{ id?: string; error?: string }> {
+export async function createClip(input: z.infer<typeof createClipReq>): Promise<{ id?: string } & NonNullable<ActionState>> {
   try {
     const user = await requireUser();
     const d = createClipReq.parse(input);
     if (!keyBelongsTo(d.key, user.id)) return { error: "Invalid upload." };
     const size = await objectSize(d.key);
     if (!size) return { error: "Upload not found. Please try again." };
+    await assertCanWrite("clip_import");
+    // Counts toward "clips per month"; deleting a clip later does not give the unit back.
+    const unit = await consume("clips_monthly");
     const row = await one<{ id: string }>(
       `insert into clips (user_id, title, campaign_id, campaign_title, storage_key, file_name, size_bytes, rights_confirmed)
        values ($1, $2, $3, $4, $5, $6, $7, true) returning id`,
       [user.id, d.title, d.campaignId || null, d.campaignTitle || null, d.key, d.fileName, size],
-    );
+    ).catch(async (e) => {
+      await unit.release();
+      throw e;
+    });
     revalidatePath("/clips");
     return { id: row!.id };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 
 export async function updateClip(clipId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
   try {
     const user = await requireUser();
+    await assertCanWrite();
     const clip = await getClip(user.id, clipId);
     if (!clip) return { error: "Clip not found." };
     const title = z.string().trim().min(1).max(200).parse(form.get("title"));
@@ -108,7 +119,7 @@ export async function updateClip(clipId: string, _prev: ActionState, form: FormD
     revalidatePath(`/clips/${clipId}`);
     return { ok: true, message: "Saved." };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 
@@ -126,8 +137,9 @@ export async function deleteClip(clipId: string) {
 
 const platformSchema = z.enum(PLATFORMS);
 
-async function ownClipOrThrow(clipId: string) {
+async function ownClipOrThrow(clipId: string, feature: "manual_posting" | "whop_submit" = "manual_posting") {
   const user = await requireUser();
+  await assertCanWrite(feature);
   const clip = await getClip(user.id, clipId);
   if (!clip) throw new Error("Clip not found.");
   return { user, clip };
@@ -181,7 +193,7 @@ export async function savePostUrl(clipId: string, platform: Platform, _prev: Act
     revalidatePath(`/clips/${clipId}`);
     return { ok: check.status !== "failed", message: [check.message, v.note].filter(Boolean).join(" "), error: check.status === "failed" ? check.message : undefined };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 
@@ -219,7 +231,7 @@ const submitReq = z.object({
 
 export async function submitClip(clipId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
   try {
-    const { user, clip } = await ownClipOrThrow(clipId);
+    const { user, clip } = await ownClipOrThrow(clipId, "whop_submit");
     const { caption, attachFile } = submitReq.parse({
       caption: (form.get("caption") as string | null) ?? undefined,
       attachFile: form.get("attachFile") === "on",
@@ -243,6 +255,9 @@ export async function submitClip(clipId: string, _prev: ActionState, form: FormD
     const canAttach = campaign.deliverableTypes.length === 0 || campaign.deliverableTypes.includes("media");
 
     const idempotencyKey = crypto.randomUUID();
+    // Reserve one "submission this month"; given back if Whop rejects the call.
+    const unit = await consume("submissions_monthly");
+    try {
     if (!modes.whop) {
       await q(
         `insert into submissions (user_id, clip_id, bounty_id, whop_submission_id, status, caption, urls, file_ids, idempotency_key, is_demo)
@@ -263,12 +278,16 @@ export async function submitClip(clipId: string, _prev: ActionState, form: FormD
         [user.id, clipId, clip.campaign_id, sub.id, sub.status ?? "submitted", caption || null, pgTextArray(urls), pgTextArray(fileIds), idempotencyKey, JSON.stringify(sub)],
       );
     }
+    } catch (e) {
+      await unit.release();
+      throw e;
+    }
     await q(`update clips set status = 'submitted', updated_at = now() where id = $1`, [clipId]);
     revalidatePath(`/clips/${clipId}`);
     revalidatePath("/submissions");
     return { ok: true, message: modes.whop ? "Submitted to Whop. It's now pending review." : "Demo submission recorded (nothing was sent to Whop)." };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 
@@ -295,7 +314,7 @@ export async function syncSubmissions(): Promise<ActionState> {
     revalidatePath("/submissions");
     return { ok: true, message: `Synced ${updated} submission${updated === 1 ? "" : "s"} with Whop.` };
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 
@@ -326,10 +345,11 @@ const noteReq = z.object({
   tags: z.array(z.string().trim().min(1).max(30)).max(8),
 });
 
-export async function addSwipeNote(input: z.infer<typeof noteReq>): Promise<{ error?: string }> {
+export async function addSwipeNote(input: z.infer<typeof noteReq>): Promise<NonNullable<ActionState>> {
   try {
     const user = await requireUser();
     const d = noteReq.parse(input);
+    await assertTotalLimit("notes");
     await q(
       `insert into swipe_notes (user_id, video_id, video_title, channel_id, channel_title, timestamp_seconds, note, tags)
        values ($1, $2, $3, $4, $5, $6, $7, $8::text[])`,
@@ -339,7 +359,7 @@ export async function addSwipeNote(input: z.infer<typeof noteReq>): Promise<{ er
     revalidatePath("/swipe");
     return {};
   } catch (err) {
-    return { error: errorMessage(err) };
+    return toActionState(err);
   }
 }
 

@@ -39,7 +39,10 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
           <span className="text-lg font-bold tracking-tight">
             Cut<span className="text-lane-400">Lane</span>
           </span>
-          {!modes.whop && <DemoTag label="Demo mode" />}
+          <div className="flex items-center gap-3">
+            <Link href="/pricing" className="text-sm text-ink-300 hover:text-ink-100">Pricing</Link>
+            {!modes.whop && <DemoTag label="Demo mode" />}
+          </div>
         </header>
 
         <section className="mt-14 max-w-2xl sm:mt-20">
@@ -61,6 +64,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
                 <button className="btn-primary w-full px-6 py-3 text-base sm:w-auto">Enter the demo</button>
               </form>
             )}
+            <Link href="/pricing" className="btn-ghost">See pricing</Link>
             <span className="text-sm text-ink-400">
               {modes.whop ? "Uses your own Whop account (OAuth 2.1 + PKCE). Tokens stay on our server." : "Whop isn't configured yet, so you'll use mock campaigns."}
             </span>
@@ -92,7 +96,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
         </section>
 
         <footer className="mt-16 border-t border-ink-800 pt-6 text-xs text-ink-400">
-          CutLane is not affiliated with Whop, YouTube, Instagram or TikTok. <Link href="/status" className="underline">Integrations status</Link>
+          CutLane is not affiliated with Whop, YouTube, Instagram or TikTok. <Link href="/pricing" className="underline">Pricing</Link>
         </footer>
       </div>
     </div>

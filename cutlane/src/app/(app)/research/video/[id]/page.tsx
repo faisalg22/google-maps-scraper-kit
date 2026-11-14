@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { getVideo } from "@/lib/youtube/api";
 import { compactNumber, formatDuration, isYouTubeId } from "@/lib/youtube/core";
 import { listSwipeNotes } from "@/lib/repo";
@@ -8,7 +8,7 @@ import { PlayerWithNotes } from "@/components/PlayerWithNotes";
 import { BackLink, DemoTag, formatDate } from "@/components/ui";
 
 export default async function VideoPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await requireUser();
+  const { user } = await requirePageAccess("write");
   const { id: rawId } = await params;
   const id = decodeURIComponent(rawId);
   if (!id.startsWith("demo-") && !isYouTubeId(id)) notFound();

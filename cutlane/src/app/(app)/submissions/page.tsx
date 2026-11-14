@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/session";
+import { requirePageAccess } from "@/lib/billing/server";
 import { modes } from "@/lib/env";
 import { dashboardCounts, listSubmissions } from "@/lib/repo";
 import { SimulateReview, SyncButton } from "@/components/SubmissionControls";
@@ -8,7 +8,7 @@ import { DemoTag, EmptyState, PageHeader, StatusBadge, formatDate } from "@/comp
 export const metadata = { title: "Submissions" };
 
 export default async function SubmissionsPage() {
-  const user = await requireUser();
+  const { user } = await requirePageAccess("read");
   const [subs, counts] = await Promise.all([listSubmissions(user.id), dashboardCounts(user.id)]);
 
   return (

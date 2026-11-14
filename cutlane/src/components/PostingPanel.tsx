@@ -5,6 +5,7 @@ import { confirmLinkManually, recheckPostUrl, savePostUrl, toggleChecklist, type
 import { CHECKLISTS, checklistComplete } from "@/lib/posting/platforms";
 import { PLATFORM_LABELS, type Platform } from "@/lib/whop/campaigns-core";
 import type { PostLink } from "@/lib/repo";
+import { ActionFeedback } from "./billing";
 
 const PLACEHOLDER: Record<Platform, string> = {
   instagram: "https://www.instagram.com/reel/…",
@@ -85,8 +86,7 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
             </button>
           </div>
           {!complete && !link?.url && <p className="text-xs text-ink-400">Tip: tick off the checklist before you post.</p>}
-          {state?.error && <p className="text-sm text-red-300" role="alert">{state.error}</p>}
-          {state?.ok && state.message && <p className="text-sm text-emerald-300">{state.message}</p>}
+          <ActionFeedback state={state} />
         </form>
 
         {link?.url && (
