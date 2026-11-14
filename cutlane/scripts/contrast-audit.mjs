@@ -77,6 +77,7 @@ const PAGES = [
   "/settings/accounts",
   "/admin",
   "/status",
+  "/design",
   "/does-not-exist",
 ];
 

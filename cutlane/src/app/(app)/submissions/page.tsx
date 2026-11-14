@@ -58,7 +58,7 @@ export default async function SubmissionsPage() {
                   {s.file_ids.length > 0 && <li className="chip">+ clip file</li>}
                 </ul>
               )}
-              {s.denial_reason && <p className="mt-3 rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">Reason: {s.denial_reason}</p>}
+              {s.denial_reason && <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-fg">Reason: {s.denial_reason}</p>}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                 {s.clip_id ? <Link href={`/clips/${s.clip_id}`} className="text-sm text-primary-strong hover:underline">Open clip →</Link> : <span />}
                 {s.is_demo && s.status === "submitted" && !modes.whop && <SimulateReview submissionId={s.id} />}

@@ -33,7 +33,7 @@ export default async function AccountsPage() {
             <section key={p} className="card p-4">
               <div className="flex items-center justify-between">
                 <p className="font-semibold">{PLATFORM_LABELS[p]}</p>
-                <p className={`font-mono text-xs ${limit !== null && list.length >= limit ? "text-warning" : "text-muted"}`}>
+                <p className={`font-mono text-xs ${limit !== null && list.length >= limit ? "text-warning-fg" : "text-muted"}`}>
                   {list.length} / {limit ?? "∞"}
                 </p>
               </div>
@@ -45,13 +45,13 @@ export default async function AccountsPage() {
                     <li key={a.id} className="flex items-center justify-between py-2 text-sm">
                       <a href={a.profile_url ?? "#"} target="_blank" rel="noopener noreferrer" className="hover:underline">@{a.handle}</a>
                       <form action={removeSocialAccount.bind(null, a.id)}>
-                        <button className="text-xs text-muted hover:text-danger">Remove</button>
+                        <button className="text-xs text-muted hover:text-danger-fg">Remove</button>
                       </form>
                     </li>
                   ))}
                 </ul>
               )}
-              {limit !== null && list.length > limit && <p className="mt-2 text-xs text-warning">Over your plan&apos;s limit after a plan change. Nothing was removed, but you can&apos;t add more.</p>}
+              {limit !== null && list.length > limit && <p className="mt-2 text-xs text-warning-fg">Over your plan&apos;s limit after a plan change. Nothing was removed, but you can&apos;t add more.</p>}
             </section>
           );
         })}

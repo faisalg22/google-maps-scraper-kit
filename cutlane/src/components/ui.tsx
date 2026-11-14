@@ -14,19 +14,19 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
 
 export function DemoTag({ label = "Demo data" }: { label?: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-md border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning">
+    <span className="inline-flex items-center gap-1 rounded-md border border-warning/40 bg-warning-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-fg">
       {label}
     </span>
   );
 }
 
 const tone: Record<string, string> = {
-  neutral: "border-border-strong bg-subtle text-fg-secondary",
-  green: "border-success/40 bg-success/10 text-success",
-  red: "border-danger/40 bg-danger/10 text-danger",
-  amber: "border-warning/40 bg-warning/10 text-warning",
-  blue: "border-info/40 bg-info/10 text-info",
-  lane: "border-primary-strong/40 bg-primary-strong/10 text-primary-strong",
+  neutral: "border-border-strong bg-raised text-fg-secondary",
+  green: "border-success/40 bg-success-soft text-success-fg",
+  red: "border-danger/40 bg-danger-soft text-danger-fg",
+  amber: "border-warning/40 bg-warning-soft text-warning-fg",
+  blue: "border-info/40 bg-info-soft text-info-fg",
+  lane: "border-accent/40 bg-accent-soft text-primary-strong",
 };
 
 export function Badge({ children, color = "neutral" }: { children: React.ReactNode; color?: keyof typeof tone }) {
@@ -71,10 +71,10 @@ export function EmptyState({ title, body, action }: { title: string; body?: Reac
 
 export function CopyrightNotice({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex gap-3 rounded-xl border border-warning/30 bg-warning/5 p-3.5 text-sm text-fg-secondary" role="note">
-      <span aria-hidden className="mt-0.5 text-warning">©</span>
+    <div className="flex gap-3 rounded-xl border border-warning/30 bg-warning-soft p-3.5 text-sm text-fg-secondary" role="note">
+      <span aria-hidden className="mt-0.5 text-warning-fg">©</span>
       <div>
-        <p className="font-semibold text-warning">Use only footage you're allowed to use</p>
+        <p className="font-semibold text-warning-fg">Use only footage you're allowed to use</p>
         {!compact && (
           <p className="mt-0.5 text-fg-secondary">
             Clip from the campaign&apos;s provided content or with the creator&apos;s written permission. Editing someone else&apos;s video
@@ -88,10 +88,10 @@ export function CopyrightNotice({ compact = false }: { compact?: boolean }) {
 
 export function Alert({ kind = "info", children }: { kind?: "info" | "error" | "success" | "warn"; children: React.ReactNode }) {
   const cls = {
-    info: "border-info/30 bg-info/5 text-info",
-    error: "border-danger/30 bg-danger/10 text-danger",
-    success: "border-success/30 bg-success/10 text-success",
-    warn: "border-warning/30 bg-warning/10 text-warning",
+    info: "border-info/30 bg-info-soft text-info-fg",
+    error: "border-danger/30 bg-danger-soft text-danger-fg",
+    success: "border-success/30 bg-success-soft text-success-fg",
+    warn: "border-warning/30 bg-warning-soft text-warning-fg",
   }[kind];
   return <div className={`rounded-xl border px-3.5 py-2.5 text-sm ${cls}`}>{children}</div>;
 }

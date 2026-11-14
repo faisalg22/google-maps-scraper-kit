@@ -8,7 +8,7 @@ import { ActionFeedback } from "./billing";
 
 export function ContactSalesForm({ defaultName, defaultEmail }: { defaultName?: string; defaultEmail?: string }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(submitSalesLead, null);
-  if (state?.ok) return <p className="rounded-xl border border-success/30 bg-success/10 p-4 text-sm text-success">{state.message}</p>;
+  if (state?.ok) return <p className="rounded-xl border border-success/30 bg-success-soft p-4 text-sm text-success-fg">{state.message}</p>;
   return (
     <form action={action} className="space-y-3">
       {/* Honeypot (hidden from people, filled by bots) */}
@@ -50,7 +50,7 @@ export function ContactSalesForm({ defaultName, defaultEmail }: { defaultName?: 
 
 export function WaitlistForm({ signedInEmail }: { signedInEmail?: string | null }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(joinWaitlist, null);
-  if (state?.ok) return <p className="text-sm text-success">{state.message}</p>;
+  if (state?.ok) return <p className="text-sm text-success-fg">{state.message}</p>;
   return (
     <form action={action} className="space-y-2">
       {!signedInEmail && <input name="email" type="email" required placeholder="you@example.com" className="input" aria-label="Email for the Clipper waitlist" />}

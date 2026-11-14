@@ -101,7 +101,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
             {b.ent.graceEndsAt && (
               <div>
                 <dt className="text-xs text-muted">{b.ent.access === "grace" ? "Grace period ends" : "Grace period ended"}</dt>
-                <dd className="text-sm font-medium text-danger">{fmt(b.ent.graceEndsAt)}</dd>
+                <dd className="text-sm font-medium text-danger-fg">{fmt(b.ent.graceEndsAt)}</dd>
               </div>
             )}
           </dl>
@@ -115,7 +115,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
             )}
             {s!.source === "mock" && (
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-warning">Test mode: simulate Stripe events</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-warning-fg">Test mode: simulate Stripe events</p>
                 <MockBillingControls status={s!.status} cancelAtPeriodEnd={s!.cancelAtPeriodEnd} pastDue={Boolean(s!.pastDueSince)} />
                 <p className="mt-2 text-xs text-muted">These go through the same subscription rules as real webhooks. With Stripe keys set, this becomes the Stripe customer portal.</p>
               </div>

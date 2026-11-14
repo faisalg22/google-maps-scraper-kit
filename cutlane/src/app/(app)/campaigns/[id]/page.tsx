@@ -71,7 +71,7 @@ export default async function CampaignDetail({ params }: { params: Promise<{ id:
               <ul className="space-y-2">
                 {c.contentLinks.map((u) => (
                   <li key={u}>
-                    <a href={u} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-3 py-2.5 text-sm hover:border-primary-strong/50">
+                    <a href={u} target="_blank" rel="noopener noreferrer nofollow" className="flex items-center justify-between gap-3 rounded-xl border border-border bg-raised px-3 py-2.5 text-sm hover:border-accent/50">
                       <span className="truncate text-primary-strong">{u}</span>
                       <span aria-hidden className="text-muted">↗</span>
                     </a>

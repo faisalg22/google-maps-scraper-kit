@@ -45,8 +45,8 @@ export default async function SwipePage({ searchParams }: { searchParams: Promis
                 {g.notes
                   .sort((a, b) => a.timestamp_seconds - b.timestamp_seconds)
                   .map((n) => (
-                    <li key={n.id} className="flex gap-3 rounded-xl bg-surface/70 p-3">
-                      <span className="h-fit rounded-md bg-subtle-strong px-1.5 py-0.5 font-mono text-xs text-primary-strong">{formatDuration(n.timestamp_seconds)}</span>
+                    <li key={n.id} className="flex gap-3 rounded-xl bg-raised/60 p-3">
+                      <span className="h-fit rounded-md bg-raised-hover px-1.5 py-0.5 font-mono text-xs text-primary-strong">{formatDuration(n.timestamp_seconds)}</span>
                       <div className="min-w-0 flex-1">
                         <p className="whitespace-pre-wrap break-words text-sm">{n.note}</p>
                         <p className="mt-1 text-xs text-muted">

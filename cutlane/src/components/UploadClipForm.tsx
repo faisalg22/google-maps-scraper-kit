@@ -93,7 +93,7 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
     <form onSubmit={submit} className="card space-y-5 p-5">
       <div>
         <label className="label" htmlFor="file">Clip file (MP4)</label>
-        <label htmlFor="file" className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface px-4 py-8 text-center hover:border-primary-strong/60">
+        <label htmlFor="file" className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-raised px-4 py-8 text-center hover:border-accent/60">
           <span className="text-sm font-medium">{file ? file.name : "Tap to choose an MP4"}</span>
           <span className="mt-1 text-xs text-muted">{file ? `${(file.size / 1024 / 1024).toFixed(1)} MB` : "Up to 1 GB"}</span>
         </label>
@@ -117,7 +117,7 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
               </p>
             )}
             {warnings.map((w) => (
-              <p key={w} className="mt-1 text-warning">{w}</p>
+              <p key={w} className="mt-1 text-warning-fg">{w}</p>
             ))}
           </div>
         </div>
@@ -139,17 +139,17 @@ export function UploadClipForm({ campaigns, defaultCampaignId }: { campaigns: { 
         <p className="mt-1 text-xs text-muted">You need a linked campaign to submit to Whop.</p>
       </div>
 
-      <label className="flex gap-3 rounded-xl border border-border bg-surface p-3 text-sm">
-        <input type="checkbox" checked={rights} onChange={(e) => setRights(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary-strong" />
+      <label className="flex gap-3 rounded-xl border border-border bg-raised p-3 text-sm">
+        <input type="checkbox" checked={rights} onChange={(e) => setRights(e.target.checked)} className="mt-0.5 h-4 w-4 accent-accent" />
         <span>I made this clip from the campaign&apos;s provided content or with the creator&apos;s permission.</span>
       </label>
 
-      {error && <p className="text-sm text-danger" role="alert">{error}</p>}
+      {error && <p className="text-sm text-danger-fg" role="alert">{error}</p>}
       {upgrade && <UpgradePrompt upgrade={upgrade} />}
 
       {progress !== null && (
-        <div className="h-2 overflow-hidden rounded-full bg-subtle" aria-label="Upload progress">
-          <div className="h-full bg-primary-strong transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
+        <div className="h-2 overflow-hidden rounded-full bg-raised" aria-label="Upload progress">
+          <div className="h-full bg-accent transition-all" style={{ width: `${Math.round(progress * 100)}%` }} />
         </div>
       )}
 

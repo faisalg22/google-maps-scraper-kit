@@ -34,13 +34,13 @@ export default async function MockCheckout({ searchParams }: { searchParams: Pro
             <><strong>${amount}</strong> per {interval === "year" ? "year" : "month"}</>
           )}
         </p>
-        <div className="mt-5 rounded-xl border border-dashed border-border-strong bg-surface p-4 text-sm text-muted">
+        <div className="mt-5 rounded-xl border border-dashed border-border-strong bg-raised p-4 text-sm text-muted">
           In live mode this is Stripe Checkout, which asks for a card up front{withTrial ? " (not charged until the trial ends)" : ""}. No card details are collected in test mode.
         </div>
         <form action={mockCompleteCheckout} className="mt-5 space-y-2">
           <input type="hidden" name="plan" value={plan} />
           <input type="hidden" name="interval" value={interval} />
-          <button className="btn-primary w-full py-3">{withTrial ? "Start free trial (simulated)" : "Subscribe (simulated)"}</button>
+          <button className="btn-cta w-full py-3">{withTrial ? "Start free trial (simulated)" : "Subscribe (simulated)"}</button>
         </form>
         <Link href="/pricing?checkout=canceled" className="btn-ghost mt-2 w-full">Cancel</Link>
       </div>

@@ -86,7 +86,7 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
                   <li key={s.id} className="card flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
                     <span className="text-fg-secondary">Submitted {formatDate(s.submitted_at)} · {s.urls.length} link{s.urls.length === 1 ? "" : "s"}</span>
                     <StatusBadge status={s.status} />
-                    {s.denial_reason && <p className="w-full text-xs text-danger">Reason: {s.denial_reason}</p>}
+                    {s.denial_reason && <p className="w-full text-xs text-danger-fg">Reason: {s.denial_reason}</p>}
                   </li>
                 ))}
               </ul>

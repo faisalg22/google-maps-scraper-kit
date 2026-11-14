@@ -15,9 +15,9 @@ const PLACEHOLDER: Record<Platform, string> = {
 
 const CHECK_UI: Record<PostLink["check_status"], { label: string; cls: string }> = {
   unchecked: { label: "Not checked", cls: "text-muted" },
-  ok: { label: "Loads publicly", cls: "text-success" },
-  blocked: { label: "Couldn't verify automatically", cls: "text-warning" },
-  failed: { label: "Not reachable", cls: "text-danger" },
+  ok: { label: "Loads publicly", cls: "text-success-fg" },
+  blocked: { label: "Couldn't verify automatically", cls: "text-warning-fg" },
+  failed: { label: "Not reachable", cls: "text-danger-fg" },
 };
 
 export function PostingPanel({ clipId, platform, link, locked }: { clipId: string; platform: Platform; link: PostLink | null; locked: boolean }) {
@@ -51,7 +51,7 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
               <label className="flex cursor-pointer gap-3 text-sm">
                 <input
                   type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-primary-strong"
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-accent"
                   checked={Boolean(checklist[s.id])}
                   disabled={locked}
                   onChange={(e) => {
@@ -90,7 +90,7 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
         </form>
 
         {link?.url && (
-          <div className="space-y-2 rounded-xl bg-surface/70 p-3 text-sm">
+          <div className="space-y-2 rounded-xl bg-raised/60 p-3 text-sm">
             <p className={CHECK_UI[link.check_status].cls}>
               {CHECK_UI[link.check_status].label}
               {link.check_http_status ? ` · HTTP ${link.check_http_status}` : ""}
@@ -100,7 +100,7 @@ export function PostingPanel({ clipId, platform, link, locked }: { clipId: strin
               <label className="flex gap-2 text-xs">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-primary-strong"
+                  className="h-4 w-4 accent-accent"
                   checked={link.manual_confirmed}
                   disabled={locked || busy}
                   onChange={(e) => {

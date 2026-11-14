@@ -48,7 +48,7 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
             {(Object.keys(CATEGORIES) as Category[]).map((k) => (
               <label key={k} className="cursor-pointer">
                 <input type="radio" name="cat" value={k} defaultChecked={(cat ?? "podcasts") === k} className="peer sr-only" />
-                <span className="chip px-3.5 py-1.5 text-sm peer-checked:border-primary-strong peer-checked:bg-primary-strong/10 peer-checked:text-primary-strong peer-focus-visible:outline-2 peer-focus-visible:outline-ring">
+                <span className="chip px-3.5 py-1.5 text-sm peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:text-primary-strong peer-focus-visible:outline-2 peer-focus-visible:outline-ring">
                   {CATEGORIES[k].label}
                 </span>
               </label>
@@ -82,7 +82,7 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
       <section className="mb-6">
         <div className="mb-2 flex items-baseline justify-between">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">Saved channels</h2>
-          <span className={`font-mono text-xs ${savedLimit !== null && saved.length >= savedLimit ? "text-danger" : savedLimit !== null && saved.length >= savedLimit * 0.8 ? "text-warning" : "text-muted"}`}>
+          <span className={`font-mono text-xs ${savedLimit !== null && saved.length >= savedLimit ? "text-danger-fg" : savedLimit !== null && saved.length >= savedLimit * 0.8 ? "text-warning-fg" : "text-muted"}`}>
             {saved.length} / {savedLimit ?? "∞"}
           </span>
         </div>
@@ -128,9 +128,9 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
               <Link key={ch.id} href={`/research/channel/${encodeURIComponent(ch.id)}`} className="card flex gap-3 p-4 transition hover:border-border-strong">
                 {ch.thumbnail ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={ch.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded-full bg-subtle object-cover" loading="lazy" />
+                  <img src={ch.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded-full bg-raised object-cover" loading="lazy" />
                 ) : (
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-border to-subtle text-lg font-bold">{ch.title.slice(0, 1)}</span>
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-raised text-lg font-bold">{ch.title.slice(0, 1)}</span>
                 )}
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">

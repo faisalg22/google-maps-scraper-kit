@@ -102,8 +102,8 @@ function DemoPlayer({ duration, onReady }: { duration: number; onReady: (h: Play
     return () => clearInterval(iv);
   }, [playing, duration]);
   return (
-    <div className="flex aspect-video w-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-subtle via-surface to-bg p-4">
-      <span className="self-start rounded-md border border-warning/40 bg-warning/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning">
+    <div className="dark flex aspect-video w-full flex-col justify-between overflow-hidden rounded-2xl border border-border bg-player p-4 text-fg">
+      <span className="self-start rounded-md border border-warning/40 bg-warning-soft px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-fg">
         Demo player: no real video
       </span>
       <button
@@ -116,7 +116,7 @@ function DemoPlayer({ duration, onReady }: { duration: number; onReady: (h: Play
       </button>
       <div className="flex items-center gap-3">
         <span className="font-mono text-xs text-fg-secondary">{formatDuration(t)}</span>
-        <input type="range" min={0} max={duration} value={t} onChange={(e) => setT(Number(e.target.value))} className="flex-1 accent-primary-strong" aria-label="Seek" />
+        <input type="range" min={0} max={duration} value={t} onChange={(e) => setT(Number(e.target.value))} className="flex-1 accent-accent" aria-label="Seek" />
         <span className="font-mono text-xs text-muted">{formatDuration(duration)}</span>
       </div>
     </div>
@@ -191,14 +191,14 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
                 key={t}
                 type="button"
                 onClick={() => toggleTag(t)}
-                className={`chip ${tags.includes(t) ? "border-primary-strong bg-primary-strong/10 text-primary-strong" : ""}`}
+                className={`chip ${tags.includes(t) ? "border-accent bg-accent-soft text-primary-strong" : ""}`}
                 aria-pressed={tags.includes(t)}
               >
                 {t}
               </button>
             ))}
           </div>
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && <p className="text-sm text-danger-fg">{error}</p>}
           {upgrade && <UpgradePrompt upgrade={upgrade} />}
           <button disabled={pending} className="btn-primary w-full">
             {pending ? "Saving…" : "Save to swipe file"}
@@ -215,7 +215,7 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
             <ul className="divide-y divide-border">
               {notes.map((n) => (
                 <li key={n.id} className="flex gap-3 py-2.5">
-                  <button type="button" onClick={() => handle.current?.seek(n.timestamp_seconds)} className="h-fit rounded-md bg-subtle-strong px-1.5 py-0.5 font-mono text-xs text-primary-strong hover:bg-border">
+                  <button type="button" onClick={() => handle.current?.seek(n.timestamp_seconds)} className="h-fit rounded-md bg-raised-hover px-1.5 py-0.5 font-mono text-xs text-primary-strong hover:bg-raised-hover">
                     {formatDuration(n.timestamp_seconds)}
                   </button>
                   <div className="min-w-0 flex-1">
@@ -225,7 +225,7 @@ export function PlayerWithNotes({ video, notes }: { video: VideoInfo; notes: Swi
                   <button
                     type="button"
                     onClick={() => start(async () => { await deleteSwipeNote(n.id); router.refresh(); })}
-                    className="h-fit text-xs text-muted hover:text-danger"
+                    className="h-fit text-xs text-muted hover:text-danger-fg"
                     aria-label="Delete note"
                   >
                     ✕

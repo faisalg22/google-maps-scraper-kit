@@ -93,7 +93,7 @@ test("no flash of the wrong theme on load", async () => {
   const s = await state(page);
   assert.equal(s.atBody, "dark", "html.dark must be set before <body> is parsed");
   assert.equal(s.firstFrame, "dark");
-  assert.equal(s.firstFrameBg, "rgb(11, 13, 17)", "first frame painted with the dark background token");
+  assert.equal(s.firstFrameBg, "rgb(11, 13, 18)", "first frame painted with the dark background token");
   // And with JavaScript bundles blocked entirely, the inline head script still applies it.
   const ctx2 = await browser.newContext({ colorScheme: "light" });
   await ctx2.addInitScript(() => localStorage.setItem("cl-theme", "dark"));

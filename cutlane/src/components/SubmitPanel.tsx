@@ -30,13 +30,13 @@ export function SubmitPanel({
       {urls.length > 0 && (
         <ul className="space-y-1">
           {urls.map((u) => (
-            <li key={u} className="truncate rounded-lg bg-surface px-3 py-1.5 font-mono text-xs text-success">✓ {u}</li>
+            <li key={u} className="truncate rounded-lg bg-raised px-3 py-1.5 font-mono text-xs text-success-fg">✓ {u}</li>
           ))}
         </ul>
       )}
 
       {blockers.length > 0 && (
-        <ul className="space-y-1 text-sm text-warning">
+        <ul className="space-y-1 text-sm text-warning-fg">
           {blockers.map((b) => (
             <li key={b}>• {b}</li>
           ))}
@@ -50,7 +50,7 @@ export function SubmitPanel({
 
       {canAttach ? (
         <label className="flex gap-2 text-sm">
-          <input type="checkbox" name="attachFile" defaultChecked className="mt-0.5 h-4 w-4 accent-primary-strong" />
+          <input type="checkbox" name="attachFile" defaultChecked className="mt-0.5 h-4 w-4 accent-accent" />
           <span>
             Attach the clip file too <span className="text-muted">(uploaded to Whop Files from our server)</span>
           </span>

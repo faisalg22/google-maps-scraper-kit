@@ -1,97 +1,9 @@
 @import "tailwindcss";
-
-/* Class-based dark mode (Tailwind's darkMode: "class"): <html class="dark">. */
-@custom-variant dark (&:where(.dark, .dark *));
+@import "../styles/tokens.css";
 
 /*
- * DESIGN TOKENS: the only place colors are defined. Light first, then dark.
- * Components use the semantic utilities below (bg-card, text-muted, border-border,
- * text-success, ...), never raw palette colors. Contrast is checked by
- * tests/theme-contrast.test.ts (WCAG AA): keep it green when you change a value.
+ * Base styles + component utilities. Colors come ONLY from tokens (src/styles/tokens.css).
  */
-:root {
-  color-scheme: light;
-  --bg: #f5f6f8;            /* page background: light gray */
-  --surface: #fafbfc;       /* inset panels, inputs */
-  --card: #ffffff;          /* cards */
-  --subtle: #eceff3;        /* chips, hover fills, tracks */
-  --subtle-strong: #e1e5ec; /* avatars, timestamp pills */
-  --border-subtle: #e6e9ee; /* layout dividers */
-  --border: #dbe0e7;        /* card outlines */
-  --border-strong: #7f899c; /* form controls (≥3:1) */
-  --fg: #12151c;            /* body text */
-  --fg-secondary: #3b4352;
-  --muted: #586173;         /* muted text (≥4.5:1 on bg/card/subtle) */
-  --primary: #c8f560;       /* the one accent: CutLane lime (fills) */
-  --primary-hover: #b5e83a;
-  --primary-fg: #12151c;    /* text on lime */
-  --primary-strong: #3f6212;/* lime as text/border/focus on light surfaces */
-  --success: #065f46;       /* approved */
-  --warning: #92400e;       /* pending */
-  --danger: #b91c1c;        /* rejected */
-  --info: #0369a1;
-  --ring: #3f6212;
-  --overlay: rgb(10 12 16 / 0.82);
-  --overlay-fg: #ffffff;
-  --player-bg: #0b0c10;     /* letterbox around videos/embeds, same in both themes */
-  --shadow-card: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.04);
-}
-
-.dark {
-  color-scheme: dark;
-  --bg: #0b0d11;            /* near-black, not pure black */
-  --surface: #0f1217;
-  --card: #141820;
-  --subtle: #1a1f29;
-  --subtle-strong: #232a36;
-  --border-subtle: #1b2029;
-  --border: #272e3c;
-  --border-strong: #5f6a85;
-  --fg: #e7eaf0;            /* soft off-white */
-  --fg-secondary: #b6bdcc;
-  --muted: #8f99ad;
-  --primary: #c8f560;
-  --primary-hover: #b5e83a;
-  --primary-fg: #0b0d11;
-  --primary-strong: #c8f560;
-  --success: #6ee7b7;
-  --warning: #fcd34d;
-  --danger: #fca5a5;
-  --info: #7dd3fc;
-  --ring: #c8f560;
-  --overlay: rgb(0 0 0 / 0.78);
-  --overlay-fg: #ffffff;
-  --player-bg: #050608;
-  --shadow-card: none;      /* borders instead of elevation */
-}
-
-@theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-card: var(--card);
-  --color-subtle: var(--subtle);
-  --color-subtle-strong: var(--subtle-strong);
-  --color-border-subtle: var(--border-subtle);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-fg: var(--fg);
-  --color-fg-secondary: var(--fg-secondary);
-  --color-muted: var(--muted);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-fg: var(--primary-fg);
-  --color-primary-strong: var(--primary-strong);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --color-info: var(--info);
-  --color-ring: var(--ring);
-  --color-overlay: var(--overlay);
-  --color-overlay-fg: var(--overlay-fg);
-  --color-player: var(--player-bg);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
 
 html,
 body {
@@ -104,17 +16,16 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--primary) 45%, transparent);
+  background: var(--accent-soft);
   color: var(--fg);
 }
 
-/* Visible focus in both themes for anything focusable that doesn't style its own. */
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-/* Short, smooth theme change. Only while switching (class added by the toggle), never on load. */
+/* Short, smooth theme change, only while switching (the toggle adds the class). */
 @media (prefers-reduced-motion: no-preference) {
   html.theme-transition,
   html.theme-transition *,
@@ -129,32 +40,41 @@ body {
   }
 }
 
+/* The one allowed gradient: landing hero + pricing page only. */
+@utility hero-glow {
+  background-image: var(--hero-glow);
+}
+
 @utility card {
-  @apply rounded-2xl border border-border bg-card shadow-[var(--shadow-card)];
+  @apply rounded-2xl border border-border bg-card shadow-card;
 }
 @utility btn {
   @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition
     disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
 }
 @utility btn-primary {
-  @apply btn border border-primary-strong/25 bg-primary text-primary-fg hover:bg-primary-hover dark:border-transparent;
+  @apply btn bg-primary text-primary-fg hover:bg-primary-hover;
+}
+/* Main call to action only (hero, start trial, checkout): primary + soft violet glow. */
+@utility btn-cta {
+  @apply btn-primary shadow-glow;
 }
 @utility btn-secondary {
-  @apply btn border border-border-strong/60 bg-subtle text-fg hover:bg-subtle-strong;
+  @apply btn border border-border bg-raised text-fg hover:bg-raised-hover;
 }
 @utility btn-ghost {
-  @apply btn text-fg-secondary hover:bg-subtle hover:text-fg;
+  @apply btn text-fg-secondary hover:bg-raised hover:text-fg;
 }
 @utility btn-danger {
-  @apply btn border border-danger/40 bg-danger/10 text-danger hover:bg-danger/20;
+  @apply btn border border-danger/40 bg-danger-soft text-danger-fg hover:bg-danger/20;
 }
 @utility input {
-  @apply w-full rounded-xl border border-border-strong bg-surface px-3.5 py-2.5 text-sm text-fg placeholder:text-muted
+  @apply w-full rounded-xl border border-border-strong bg-card px-3.5 py-2.5 text-sm text-fg placeholder:text-muted
     focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/30;
 }
 @utility label {
   @apply mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted;
 }
 @utility chip {
-  @apply inline-flex items-center gap-1 rounded-full border border-border bg-subtle px-2.5 py-0.5 text-xs font-medium text-fg-secondary;
+  @apply inline-flex items-center gap-1 rounded-full border border-border bg-raised px-2.5 py-0.5 text-xs font-medium text-fg-secondary;
 }

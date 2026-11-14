@@ -72,6 +72,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
   const price = (p: typeof b) => (interval === "year" ? p.annualPrice! : p.monthlyPrice!);
 
   return (
+    <div className="hero-glow bg-no-repeat">
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <header className="flex items-center justify-between">
         <Logo href="/" />
@@ -97,8 +98,8 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
       {annualOn && (
         <div className="mt-6 flex justify-center">
           <div className="inline-flex rounded-xl border border-border bg-card p-1 text-sm">
-            <Link href="/pricing" className={`rounded-lg px-4 py-1.5 ${interval === "month" ? "bg-subtle-strong text-fg" : "text-muted"}`}>Monthly</Link>
-            <Link href="/pricing?billing=annual" className={`rounded-lg px-4 py-1.5 ${interval === "year" ? "bg-subtle-strong text-fg" : "text-muted"}`}>
+            <Link href="/pricing" className={`rounded-lg px-4 py-1.5 ${interval === "month" ? "bg-raised-hover text-fg" : "text-muted"}`}>Monthly</Link>
+            <Link href="/pricing?billing=annual" className={`rounded-lg px-4 py-1.5 ${interval === "year" ? "bg-raised-hover text-fg" : "text-muted"}`}>
               Annual <span className="text-primary-strong">· 2 months free</span>
             </Link>
           </div>
@@ -107,7 +108,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
       <section className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
         {/* Beginner */}
-        <div className={`card relative flex flex-col p-6 ${sp.start === "beginner" ? "border-primary-strong" : "border-primary-strong/50"}`}>
+        <div className={`card relative flex flex-col p-6 ${sp.start === "beginner" ? "border-accent" : "border-accent/50"}`}>
           <span className="absolute -top-3 left-6 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-fg">3-day free trial</span>
           <h2 className="text-xl font-bold">{b.name}</h2>
           <p className="mt-1 text-sm text-muted">{b.tagline}</p>
@@ -132,7 +133,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
               <form action={startCheckout}>
                 <input type="hidden" name="plan" value="beginner" />
                 <input type="hidden" name="interval" value={interval} />
-                <button className="btn-primary w-full py-3 text-base">{eligible ? "Start 3-day free trial" : `Subscribe for $${price(b)}`}</button>
+                <button className="btn-cta w-full py-3 text-base">{eligible ? "Start 3-day free trial" : `Subscribe for $${price(b)}`}</button>
               </form>
             )}
             <p className="mt-2 text-center text-xs text-muted">
@@ -143,7 +144,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
         {/* Clipper */}
         <div className="card relative flex flex-col p-6">
-          <span className="absolute -top-3 left-6 rounded-full border border-border-strong bg-subtle px-2.5 py-0.5 text-xs font-bold text-fg-secondary">Coming soon</span>
+          <span className="absolute -top-3 left-6 rounded-full border border-border-strong bg-raised px-2.5 py-0.5 text-xs font-bold text-fg-secondary">Coming soon</span>
           <h2 className="text-xl font-bold">{c.name}</h2>
           <p className="mt-1 text-sm text-muted">{c.tagline}</p>
           <p className="mt-5">
@@ -257,6 +258,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
       </section>
 
       <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">Prices in USD. Taxes may apply. CutLane is not affiliated with Whop.</footer>
+    </div>
     </div>
   );
 }

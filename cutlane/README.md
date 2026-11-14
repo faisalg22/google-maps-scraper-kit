@@ -117,16 +117,22 @@ There are three options: **Light**, **Dark** and **System** (the default, which 
 - **Signed-out visitors:** saved in `localStorage` (`cl-theme`). On first sign-in, if the account has no saved theme yet, the visitor's choice is adopted. If the account already has one, the account's choice wins.
 - **No flash on load:** an inline script in `<head>` (`THEME_INIT_SCRIPT` in `src/lib/theme.ts`) sets `html.dark` before first paint. It still works if the JavaScript bundles fail to load.
 
-**Design tokens**
-- `src/app/globals.css` is the only place colors live: light values in `:root`, dark in `.dark` (class-based dark mode via `@custom-variant dark`). Components use semantic utilities such as `bg-card`, `text-muted`, `border-border`, `text-success`, `bg-primary` and `ring-ring`, never raw palette colors.
-- **Accent:** CutLane lime (`--primary`) fills buttons in both themes. `--primary-strong` is lime in dark and a deep lime in light, used for links, borders, focus rings and meter bars so they keep contrast.
-- **Dark theme:** near-black background, off-white text, borders instead of shadows. **Light theme:** white cards on light gray with a subtle shadow.
+**Design tokens** (`src/styles/tokens.css`, the single source of truth; preview at **`/design`**)
+- **Structure:** raw palette, then light semantic tokens (`:root, .light`), then dark (`.dark`), then the Tailwind v4 config. That config is the `@custom-variant dark`, the equivalent of `darkMode: "class"`, plus the `@theme inline` mapping that turns tokens into utilities. Tailwind v4 is configured in CSS, so there is no `tailwind.config.js`.
+- **Layering:** `bg` < `surface` (sidebar, top bar, bottom nav) < `card` (cards, tables, modals, toasts, form fields) < `raised` (hover, chips, inset blocks, meter tracks). Nest at most 3 levels in one region. There are no gradients in app screens; `hero-glow` (violet, under 15%) is used only on the landing hero and pricing page.
+- **Accent:** electric violet `#7C5CFF` (`--accent`) for the focus ring, selection, meters and the CTA glow (`btn-cta`, main calls to action only). White text on `#7C5CFF` is 4.35:1, below AA, so button fills use `--primary` `#6A49F0` (5.49:1) and hover `#5B3BDB`. Violet text uses `--primary-strong`: `#A594FF` on dark, `#5B3BDB` on light.
+- **Status colors:** each one has a base hue (`--success` `#22C55E`, `--warning` `#F59E0B`, `--danger` `#EF4444`, `--info` `#38BDF8`) for dots, borders and tints; `--*-soft` (10–14%) for badge backgrounds; and `--*-fg` for AA text. The text tone is darker in light mode, and a lighter red in dark mode.
+- **Video:** players and the demo player are forced-dark regions (`.dark` on a `--player-bg` letterbox), the same in both themes.
 - **Logos:** light and dark variants are in `public/brand/`. The favicon adapts to the browser's own scheme.
-- **Video:** players and the YouTube embed sit on a near-black `--player-bg` letterbox in both themes.
 - Theme changes animate briefly (200 ms), except under `prefers-reduced-motion`.
 
 **Accessibility checks**
-- `tests/theme-contrast.test.ts` checks every token pair against WCAG AA in both themes: body and status text 4.5:1 on every surface and on status tints, input borders, focus ring and meter bars 3:1.
+- `tests/theme-contrast.test.ts` checks `tokens.css` in both themes:
+  - the exact brand hexes are kept;
+  - text, including muted, is ≥4.5:1 on every background level (bg, surface, card, raised, raised-hover);
+  - status and violet text is ≥4.5:1 on its tinted badge over every level;
+  - button labels are ≥4.5:1;
+  - focus ring, form borders and meter bars are ≥3:1.
 - `scripts/contrast-audit.mjs` runs axe-core's contrast rule plus a horizontal-overflow check on every page, in light and dark, at mobile and desktop widths.
 - The toggle is a WAI-ARIA radio group: arrow keys, Home and End move between options, and each option has a label.
 

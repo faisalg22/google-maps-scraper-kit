@@ -176,7 +176,7 @@ export function ThemeToggle({ compact = false, className = "" }: { compact?: boo
   };
 
   return (
-    <div role="radiogroup" aria-label="Theme" className={`inline-flex rounded-xl border border-border bg-subtle p-0.5 ${className}`}>
+    <div role="radiogroup" aria-label="Theme" className={`inline-flex rounded-xl border border-border bg-raised p-0.5 ${className}`}>
       {OPTIONS.map((o, i) => {
         const checked = o.value === pref;
         return (
@@ -195,7 +195,7 @@ export function ThemeToggle({ compact = false, className = "" }: { compact?: boo
             onKeyDown={(e) => onKey(e, i)}
             className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring ${
               compact ? "h-10 w-10" : "h-10 px-3.5"
-            } ${checked ? "bg-card text-fg shadow-[var(--shadow-card)] ring-1 ring-border" : "text-muted hover:text-fg"}`}
+            } ${checked ? "bg-card text-fg shadow-card ring-1 ring-border" : "text-muted hover:text-fg"}`}
           >
             {o.icon}
             {!compact && <span>{o.label}</span>}

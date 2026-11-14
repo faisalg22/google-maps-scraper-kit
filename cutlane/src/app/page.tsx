@@ -35,7 +35,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="relative min-h-dvh overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-primary-strong/10 blur-3xl" />
+      <div aria-hidden className="hero-glow pointer-events-none absolute inset-x-0 top-0 h-[640px]" />
       <div className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
         <header className="flex items-center justify-between">
           <Logo href="/" />
@@ -57,12 +57,12 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             {modes.whop ? (
-              <a href={`/api/auth/whop/start?returnTo=${encodeURIComponent(returnTo)}`} className="btn-primary px-6 py-3 text-base">
+              <a href={`/api/auth/whop/start?returnTo=${encodeURIComponent(returnTo)}`} className="btn-cta px-6 py-3 text-base">
                 Sign in with Whop
               </a>
             ) : (
               <form action={demoSignIn}>
-                <button className="btn-primary w-full px-6 py-3 text-base sm:w-auto">Enter the demo</button>
+                <button className="btn-cta w-full px-6 py-3 text-base sm:w-auto">Enter the demo</button>
               </form>
             )}
             <Link href="/pricing" className="btn-ghost">See pricing</Link>

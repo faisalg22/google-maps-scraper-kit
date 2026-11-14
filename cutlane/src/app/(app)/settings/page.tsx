@@ -27,7 +27,7 @@ export default async function SettingsPage() {
           ["/pricing", "Plans", "Compare Beginner, Clipper and Custom"],
           ["/status", "Integrations status", "What's live and what's in demo mode"],
         ].map(([href, label, sub]) => (
-          <Link key={href} href={href} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-subtle">
+          <Link key={href} href={href} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-raised">
             <span>
               <span className="block text-sm font-medium">{label}</span>
               <span className="block text-xs text-muted">{sub}</span>

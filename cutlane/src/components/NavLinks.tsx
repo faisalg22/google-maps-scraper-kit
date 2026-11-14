@@ -47,7 +47,7 @@ export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bot
         <li key={i.href}>
           <Link
             href={i.href}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${active(i.href) ? "bg-subtle text-fg" : "text-muted hover:bg-card hover:text-fg"}`}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${active(i.href) ? "bg-raised text-fg" : "text-muted hover:bg-card hover:text-fg"}`}
           >
             <span aria-hidden className={`w-4 text-center ${active(i.href) ? "text-primary-strong" : ""}`}>{i.icon}</span>
             {i.label}
@@ -57,7 +57,7 @@ export function NavLinks({ variant, admin = false }: { variant: "sidebar" | "bot
       <li className="pt-4" />
       {sec.map((i) => (
         <li key={i.href}>
-          <Link href={i.href} className={`flex items-center gap-3 rounded-xl px-3 py-1.5 text-xs font-medium ${active(i.href) ? "bg-subtle text-fg" : "text-muted hover:text-fg"}`}>
+          <Link href={i.href} className={`flex items-center gap-3 rounded-xl px-3 py-1.5 text-xs font-medium ${active(i.href) ? "bg-raised text-fg" : "text-muted hover:text-fg"}`}>
             <span aria-hidden className="w-4 text-center">{i.icon}</span>
             {i.label}
           </Link>
