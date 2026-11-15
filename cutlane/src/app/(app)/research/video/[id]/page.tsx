@@ -40,7 +40,9 @@ export default async function VideoPage({ params }: { params: Promise<{ id: stri
         notes={notes}
       />
       <p className="mt-6 text-xs text-muted">
-        Research only. CutLane plays YouTube through the official embedded player and never downloads videos. Saved notes are in your{" "}
+        Research only. CutLane plays YouTube through the official embedded player and never downloads videos. Uses YouTube API Services; see the{" "}
+        <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" className="underline">YouTube Terms of Service</a> and{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Google Privacy Policy</a>. Saved notes are in your{" "}
         <Link href="/swipe" className="underline">swipe file</Link>.
       </p>
     </div>

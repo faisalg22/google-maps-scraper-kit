@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { redirect } from "next/navigation";
 import { MONTHLY_METRICS, PLANS, type Feature, type Metric } from "@/config/plans";
-import { env, modes } from "../env";
+import { demoAllowed, env, modes } from "../env";
 import { one, q } from "../db";
 import { getCurrentUser, type User } from "../auth/session";
 import {
@@ -115,7 +115,7 @@ export function overridesOf(ws: Workspace): WorkspaceOverrides {
 export function isAdmin(user: User): boolean {
   if (env.adminWhopUserIds.includes(user.whop_user_id)) return true;
   // In demo mode (Whop not configured) the demo account can open /admin for review.
-  return !modes.whop && user.is_demo;
+  return !modes.whop && user.is_demo && demoAllowed();
 }
 
 export interface Billing {
@@ -161,7 +161,7 @@ export async function assertCanWrite(feature?: Feature): Promise<Billing> {
 }
 
 /** Reserve one unit of a monthly metric. Call release() if the action then fails. */
-export async function consume(metric: Metric, amount = 1): Promise<{ release: () => Promise<void> }> {
+export async function consume(metric: Metric, amount = 1): Promise<{ release: () => Promise<void>; periodStart: Date }> {
   if (!MONTHLY_METRICS.includes(metric)) throw new Error(`${metric} is not a monthly metric`);
   const b = await assertCanWrite();
   const period = b.ent.usagePeriod!;
@@ -171,7 +171,7 @@ export async function consume(metric: Metric, amount = 1): Promise<{ release: ()
     const used = (await readMonthly(q, b.workspace.id, period.start))[metric] ?? 0;
     throw new LimitReachedError(metric, limit ?? 0, used);
   }
-  return { release: () => releaseMonthly(q, b.workspace.id, metric, period.start, amount) };
+  return { release: () => releaseMonthly(q, b.workspace.id, metric, period.start, amount), periodStart: period.start };
 }
 
 /** Pre-check a monthly metric without consuming (e.g. before a big upload). */

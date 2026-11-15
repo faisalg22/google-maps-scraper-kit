@@ -3,6 +3,7 @@ import { requirePageAccess } from "@/lib/billing/server";
 import { modes } from "@/lib/env";
 import { dashboardCounts, listSubmissions } from "@/lib/repo";
 import { SimulateReview, SyncButton } from "@/components/SubmissionControls";
+import { SubmissionJobRunner } from "@/components/SubmissionJob";
 import { DemoTag, EmptyState, PageHeader, StatusBadge, formatDate } from "@/components/ui";
 
 export const metadata = { title: "Submissions" };
@@ -57,6 +58,11 @@ export default async function SubmissionsPage() {
                   ))}
                   {s.file_ids.length > 0 && <li className="chip">+ clip file</li>}
                 </ul>
+              )}
+              {s.job_state !== "done" && (
+                <div className="mt-3">
+                  <SubmissionJobRunner jobId={s.id} initialState={s.job_state} initialError={s.job_error} />
+                </div>
               )}
               {s.denial_reason && <p className="mt-3 rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger-fg">Reason: {s.denial_reason}</p>}
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2">

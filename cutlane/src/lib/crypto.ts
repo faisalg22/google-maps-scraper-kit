@@ -2,7 +2,7 @@ import "server-only";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { env, modes } from "./env";
+import { demoAllowed, env, modes } from "./env";
 import { decodeKey, encryptWith, decryptWith, hmacWith } from "./crypto-core";
 
 let cachedKey: Buffer | null = null;
@@ -18,8 +18,8 @@ export function masterKey(): Buffer {
     cachedKey = decodeKey(env.tokenEncryptionKey);
     return cachedKey;
   }
-  if (modes.whop) {
-    throw new Error("TOKEN_ENCRYPTION_KEY is required when Whop is configured. Generate one with `npm run keygen`.");
+  if (modes.whop || !demoAllowed()) {
+    throw new Error("TOKEN_ENCRYPTION_KEY is required. Generate one with `npm run keygen`.");
   }
   const dir = path.join(process.cwd(), ".data");
   const file = path.join(dir, "dev-secret.key");

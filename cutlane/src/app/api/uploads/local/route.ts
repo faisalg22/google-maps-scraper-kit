@@ -3,7 +3,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { NextResponse, type NextRequest } from "next/server";
-import { modes } from "@/lib/env";
+import { demoAllowed, modes } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getBillingFor } from "@/lib/billing/server";
 import { keyBelongsTo, localPath, MAX_CLIP_BYTES, verifyLocalUploadSignature } from "@/lib/storage";
@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 
 /** DEMO storage only: receives the PUT for a signed upload target and streams it to ./.data/uploads. */
 export async function PUT(req: NextRequest) {
-  if (modes.storage) return NextResponse.json({ error: "Local uploads are disabled" }, { status: 404 });
+  if (modes.storage || !demoAllowed()) return NextResponse.json({ error: "Local uploads are disabled" }, { status: 404 });
   const user = await getCurrentUser();
   const sp = req.nextUrl.searchParams;
   const key = sp.get("key") ?? "";

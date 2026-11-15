@@ -1,5 +1,5 @@
 import "server-only";
-import { env, modes } from "../env";
+import { env, modes, requireLiveOrDemo } from "../env";
 import { one, q } from "../db";
 import { mockChannel, mockChannelVideos, mockSearchChannels, mockVideo } from "../mock/youtube";
 import { CATEGORIES, LONG_VIDEO_SECONDS, parseIsoDuration, type Category, type Channel, type Video } from "./core";
@@ -123,7 +123,10 @@ export interface ChannelSearchResult {
   fromCache: boolean;
 }
 
+const requireYouTube = () => requireLiveOrDemo(modes.youtube, "YouTube research", "YOUTUBE_API_KEY");
+
 export async function searchChannels(category: Category, query: string, minSubs: number): Promise<ChannelSearchResult> {
+  requireYouTube();
   if (!modes.youtube) {
     const all = mockSearchChannels(category, query, 0);
     const channels = all.filter((c) => c.subscribers >= minSubs);
@@ -153,6 +156,7 @@ export async function searchChannels(category: Category, query: string, minSubs:
 }
 
 export async function getChannel(channelId: string): Promise<Channel | null> {
+  requireYouTube();
   if (!modes.youtube) return mockChannel(channelId);
   return cached(`channel:v1:${channelId}`, TTL.channel, async () => {
     const res = await yt<{ items?: ChannelItem[] }>("channels", { part: "snippet,statistics,contentDetails", id: channelId }, 1);
@@ -179,6 +183,7 @@ export async function getChannelVideos(channel: Channel, minSeconds = LONG_VIDEO
 }
 
 export async function getVideo(videoId: string): Promise<Video | null> {
+  requireYouTube();
   if (!modes.youtube || videoId.startsWith("demo-")) return mockVideo(videoId);
   return cached(`video:v1:${videoId}`, TTL.video, async () => {
     const res = await yt<{ items?: VideoItem[] }>("videos", { part: "snippet,statistics,contentDetails", id: videoId }, 1);

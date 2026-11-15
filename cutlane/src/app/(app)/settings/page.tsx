@@ -26,6 +26,8 @@ export default async function SettingsPage() {
           ["/settings/accounts", "Posting accounts", "Instagram, TikTok and YouTube handles"],
           ["/pricing", "Plans", "Compare Beginner, Clipper and Custom"],
           ["/status", "Integrations status", "What's live and what's in demo mode"],
+          ["/terms", "Terms of Service", "Trial, billing and acceptable use"],
+          ["/privacy", "Privacy Policy", "What we collect and your rights"],
         ].map(([href, label, sub]) => (
           <Link key={href} href={href} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-raised">
             <span>

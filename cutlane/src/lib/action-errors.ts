@@ -9,6 +9,8 @@ export type ActionState = {
   ok?: boolean;
   error?: string;
   message?: string;
+  /** Set when a submission was queued as a background job (the UI drives it to completion). */
+  jobId?: string;
   upgrade?: { kind: "limit"; metric: Metric; limit: number; used: number } | { kind: "access"; reason: string } | { kind: "feature" };
 } | null;
 

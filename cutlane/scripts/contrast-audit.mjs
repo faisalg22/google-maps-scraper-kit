@@ -2,7 +2,7 @@
  * Contrast + layout audit: every page, light and dark, mobile and desktop.
  * Uses axe-core's WCAG AA `color-contrast` rule (4.5:1 text, 3:1 large text) and checks for
  * horizontal overflow. Run against a fresh demo-mode server:
- *   rm -rf .data && npm run build && npm start   (another terminal)
+ *   rm -rf .data && npm run build && ALLOW_DEMO=true npm start   (another terminal)
  *   node scripts/contrast-audit.mjs [--shots <dir>]
  */
 import { createRequire } from "node:module";
@@ -78,6 +78,8 @@ const PAGES = [
   "/admin",
   "/status",
   "/design",
+  "/terms",
+  "/privacy",
   "/does-not-exist",
 ];
 

@@ -1,3 +1,5 @@
+import { after } from "next/server";
+import { refreshStaleYouTubeData } from "@/lib/youtube/retention";
 import Link from "next/link";
 import { requirePageAccess } from "@/lib/billing/server";
 import { listSwipeNotes } from "@/lib/repo";
@@ -7,10 +9,11 @@ import { EmptyState, PageHeader, formatDate } from "@/components/ui";
 export const metadata = { title: "Swipe file" };
 
 export default async function SwipePage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  const { user } = await requirePageAccess("read");
+  const { user, workspace } = await requirePageAccess("read");
   const sp = await searchParams;
   const search = (sp.q ?? "").slice(0, 100);
   const notes = await listSwipeNotes(user.id, { search: search || undefined });
+  after(() => refreshStaleYouTubeData({ workspaceId: workspace.id, limit: 10 }).catch(() => undefined));
 
   const groups = new Map<string, { title: string; channel: string | null; notes: typeof notes }>();
   for (const n of notes) {

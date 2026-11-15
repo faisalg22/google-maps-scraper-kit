@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth/session";
-import { modes } from "@/lib/env";
+import { demoAllowed, modes } from "@/lib/env";
 import { safeReturnTo } from "@/lib/whop/oauth";
 import { demoSignIn } from "./actions";
 import { Alert, CopyrightNotice, DemoTag } from "@/components/ui";
 import { Logo } from "@/components/Brand";
 import { ThemeToggle } from "@/components/theme";
+import { LegalFooterLinks } from "@/components/LegalPage";
 
 const ERRORS: Record<string, string> = {
   access_denied: "You cancelled the Whop sign-in.",
@@ -60,6 +61,8 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
               <a href={`/api/auth/whop/start?returnTo=${encodeURIComponent(returnTo)}`} className="btn-cta px-6 py-3 text-base">
                 Sign in with Whop
               </a>
+            ) : !demoAllowed() ? (
+              <Alert kind="warn">Sign-in isn&apos;t available yet. The server is missing its Whop configuration.</Alert>
             ) : (
               <form action={demoSignIn}>
                 <button className="btn-cta w-full px-6 py-3 text-base sm:w-auto">Enter the demo</button>
@@ -97,7 +100,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
         </section>
 
         <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">
-          CutLane is not affiliated with Whop, YouTube, Instagram or TikTok. <Link href="/pricing" className="underline">Pricing</Link>
+          CutLane is not affiliated with Whop, YouTube, Instagram or TikTok. <Link href="/pricing" className="underline">Pricing</Link> <LegalFooterLinks className="ml-3" />
         </footer>
       </div>
     </div>

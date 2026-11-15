@@ -43,6 +43,8 @@ const statusColor: Record<string, keyof typeof tone> = {
   ready: "blue",
   posted: "lane",
   submitted: "amber",
+  queued: "blue",
+  failed: "red",
   in_progress: "amber",
   approved: "green",
   rejected: "red",
@@ -51,6 +53,8 @@ const statusColor: Record<string, keyof typeof tone> = {
 
 const statusLabel: Record<string, string> = {
   submitted: "Pending review",
+  queued: "Sending to Whop…",
+  failed: "Failed to send",
   in_progress: "In progress",
   denied: "Rejected",
 };

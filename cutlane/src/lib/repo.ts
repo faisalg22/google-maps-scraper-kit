@@ -50,6 +50,8 @@ export interface Submission {
   urls: string[];
   file_ids: string[];
   is_demo: boolean;
+  job_state: "queued" | "uploading" | "processing" | "creating" | "done" | "failed";
+  job_error: string | null;
   submitted_at: string;
   resolved_at: string | null;
 }
@@ -108,7 +110,7 @@ export function linkIsSubmittable(l: PostLink): boolean {
 }
 
 const SUB_COLS = `s.id, s.clip_id, c.title as clip_title, s.bounty_id, c.campaign_title, s.whop_submission_id, s.status, s.denial_reason,
-  s.caption, s.urls, s.file_ids, s.is_demo, s.submitted_at, s.resolved_at`;
+  s.caption, s.urls, s.file_ids, s.is_demo, s.job_state, s.job_error, s.submitted_at, s.resolved_at`;
 
 function mapSub(r: Record<string, unknown>): Submission {
   return { ...(r as unknown as Submission), submitted_at: iso(r.submitted_at)!, resolved_at: iso(r.resolved_at) };

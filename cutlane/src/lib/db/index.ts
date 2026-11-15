@@ -1,7 +1,7 @@
 import "server-only";
 import path from "node:path";
 import fs from "node:fs";
-import { env, modes } from "../env";
+import { env, modes, requireLiveOrDemo } from "../env";
 import { runMigrations, type MigrationDriver } from "./migrate-core";
 
 type Row = Record<string, unknown>;
@@ -58,6 +58,8 @@ const g = globalThis as unknown as { __cutlaneDb?: Promise<Db> };
 
 export function getDb(): Promise<Db> {
   if (!g.__cutlaneDb) {
+    // The embedded database lives on local disk: fine for development, data loss in production.
+    requireLiveOrDemo(modes.database, "The database", "DATABASE_URL");
     g.__cutlaneDb = (modes.database ? createPostgres() : createPglite()).catch((err) => {
       g.__cutlaneDb = undefined;
       throw err;

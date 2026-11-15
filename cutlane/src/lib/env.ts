@@ -55,6 +55,12 @@ export const env = {
   },
   adminWhopUserIds: (v("ADMIN_WHOP_USER_IDS") ?? "").split(",").map((s) => s.trim()).filter(Boolean),
   tokenEncryptionKey: v("TOKEN_ENCRYPTION_KEY"),
+  /** Demo/test fallbacks in a production build (staging/review deploys only). Never set on the real site. */
+  allowDemo: v("ALLOW_DEMO") === "true",
+  legal: {
+    entity: v("LEGAL_ENTITY_NAME"),
+    contactEmail: v("LEGAL_CONTACT_EMAIL"),
+  },
   isProd: process.env.NODE_ENV === "production",
 };
 
@@ -86,6 +92,41 @@ export const modes = {
     return !this.whop || !this.youtube || !this.database || !this.storage || !this.stripe;
   },
 };
+
+/**
+ * Mock data, demo sign-in, simulated billing, the local database and local file storage are
+ * development conveniences. In a production build they are OFF unless ALLOW_DEMO=true, so a
+ * missing key can never turn into free plans, an open /admin, or data on an ephemeral disk.
+ */
+export function demoAllowed(): boolean {
+  return !env.isProd || env.allowDemo;
+}
+
+export class NotConfiguredError extends Error {
+  constructor(what: string, vars: string) {
+    super(`${what} isn't configured on this server (${vars}).`);
+  }
+}
+
+/** Throws when a feature would fall back to demo behaviour where that isn't allowed. */
+export function requireLiveOrDemo(live: boolean, what: string, vars: string): void {
+  if (!live && !demoAllowed()) throw new NotConfiguredError(what, vars);
+}
+
+/** Required configuration for a real production deploy. Empty array = ready. */
+export function productionConfigErrors(): string[] {
+  const e: string[] = [];
+  const need = (ok: boolean, msg: string) => !ok && e.push(msg);
+  need(Boolean(env.databaseUrl), "DATABASE_URL (Supabase Postgres)");
+  need(Boolean(env.tokenEncryptionKey), "TOKEN_ENCRYPTION_KEY (npm run keygen)");
+  need(modes.whop, "WHOP_CLIENT_ID, WHOP_CLIENT_SECRET, WHOP_REDIRECT_URI");
+  need(modes.stripe, "STRIPE_SECRET_KEY and STRIPE_PRICE_BEGINNER");
+  need(Boolean(env.stripe.webhookSecret), "STRIPE_WEBHOOK_SECRET");
+  need(modes.storage, "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (clip storage)");
+  need(modes.youtube, "YOUTUBE_API_KEY");
+  need(env.appUrl.startsWith("https://"), "APP_URL must be your https:// URL");
+  return e;
+}
 
 export type PublicModes = {
   stripe: boolean;
@@ -138,6 +179,18 @@ export function configWarnings(): string[] {
   }
   if (modes.stripe && env.stripe.secretKey?.startsWith("sk_live") && !modes.whop) {
     w.push("Live Stripe keys are set while Whop is in demo mode.");
+  }
+  if (env.isProd && env.allowDemo) {
+    w.push("ALLOW_DEMO=true: demo sign-in, mock data and simulated billing are enabled. Use this only for staging or review deploys.");
+  }
+  if (env.isProd && !process.env.CRON_SECRET) {
+    w.push("CRON_SECRET is missing, so the daily YouTube data refresh can't run (stored YouTube data must be refreshed within 30 days).");
+  }
+  if (env.isProd && env.adminWhopUserIds.length === 0) {
+    w.push("ADMIN_WHOP_USER_IDS is empty, so nobody can open /admin.");
+  }
+  if (env.isProd && (!env.legal.entity || !env.legal.contactEmail)) {
+    w.push("Set LEGAL_ENTITY_NAME and LEGAL_CONTACT_EMAIL so the Terms and Privacy pages name you correctly.");
   }
   if (env.isProd && !env.appUrl.startsWith("https://")) {
     w.push("APP_URL should be https:// in production.");

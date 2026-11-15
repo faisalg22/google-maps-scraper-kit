@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FEATURE_LABELS, PLANS, type Feature, type Metric } from "@/config/plans";
 import { getCurrentUser } from "@/lib/auth/session";
-import { env, modes } from "@/lib/env";
+import { demoAllowed, env, modes } from "@/lib/env";
 import { ensureWorkspace, loadSubscription, trialEligible } from "@/lib/billing/server";
 import { annualAvailable } from "@/lib/billing/stripe";
 import { startCheckout } from "../billing-actions";
@@ -9,6 +9,7 @@ import { ContactSalesForm, WaitlistForm } from "@/components/billing-client";
 import { Alert, DemoTag } from "@/components/ui";
 import { Logo } from "@/components/Brand";
 import { ThemeToggle } from "@/components/theme";
+import { LegalFooterLinks } from "@/components/LegalPage";
 
 export const metadata = { title: "Pricing" };
 export const dynamic = "force-dynamic";
@@ -77,7 +78,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
       <header className="flex items-center justify-between">
         <Logo href="/" />
         <div className="flex items-center gap-2">
-          {!modes.stripe && <DemoTag label="Test mode" />}
+          {!modes.stripe && demoAllowed() && <DemoTag label="Test mode" />}
           <ThemeToggle compact />
           {user ? <Link href="/dashboard" className="btn-ghost">Back to app</Link> : <Link href="/?returnTo=/pricing" className="btn-ghost">Sign in</Link>}
         </div>
@@ -92,7 +93,8 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         {sp.required && <Alert kind="info">CutLane has no free plan. Pick a plan (or start your trial) to continue. Your data is kept either way.</Alert>}
         {sp.checkout === "canceled" && <Alert kind="warn">Checkout canceled. You weren&apos;t charged.</Alert>}
         {sp.clipper === "soon" && <Alert kind="info">Clipper isn&apos;t available yet. Join the waitlist below.</Alert>}
-        {!modes.stripe && <Alert kind="warn">Test mode: Stripe keys aren&apos;t set, so checkout is simulated and no card is charged.</Alert>}
+        {!modes.stripe && demoAllowed() && <Alert kind="warn">Test mode: Stripe keys aren&apos;t set, so checkout is simulated and no card is charged.</Alert>}
+        {(sp.checkout === "unavailable" || (!modes.stripe && !demoAllowed())) && <Alert kind="error">Checkout is temporarily unavailable. Please try again later.</Alert>}
       </div>
 
       {annualOn && (
@@ -137,7 +139,8 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
               </form>
             )}
             <p className="mt-2 text-center text-xs text-muted">
-              {eligible ? `Card required. Then $${price(b)}/${interval === "year" ? "yr" : "mo"} unless you cancel. One trial per account.` : "You've already used your free trial."}
+              {eligible ? `Card required. Then $${price(b)}/${interval === "year" ? "yr" : "mo"} unless you cancel. One trial per account.` : "You've already used your free trial."}{" "}
+              By continuing you agree to the <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.
             </p>
           </div>
         </div>
@@ -257,7 +260,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
       </section>
 
-      <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">Prices in USD. Taxes may apply. CutLane is not affiliated with Whop.</footer>
+      <footer className="mt-16 border-t border-border-subtle pt-6 text-xs text-muted">Prices in USD. Taxes may apply. CutLane is not affiliated with Whop. <LegalFooterLinks className="ml-3" /></footer>
     </div>
     </div>
   );

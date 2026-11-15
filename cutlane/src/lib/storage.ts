@@ -2,7 +2,7 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import { Readable } from "node:stream";
-import { env, modes } from "./env";
+import { env, modes, requireLiveOrDemo } from "./env";
 import { hmac, safeEqual } from "./crypto";
 
 /**
@@ -56,6 +56,7 @@ export interface UploadTarget {
 }
 
 export async function createUploadTarget(key: string, mime: string): Promise<UploadTarget> {
+  requireLiveOrDemo(modes.storage, "Clip storage", "SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY");
   if (modes.storage) {
     await ensureBucket();
     const sb = await supabase();

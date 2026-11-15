@@ -47,6 +47,19 @@ Each integration switches to its **real API on its own** as soon as its variable
 >
 > `SUPABASE_ANON_KEY` is accepted but unused in V1, because everything goes through the server. Row Level Security is **enabled with no policies** on every table, so the anon key can't read anything.
 
+## Deploying
+
+**Production is strict on purpose.** In a production build (`npm run build && npm start`), the server **refuses to start** if any required setting is missing, and it prints exactly which ones. Required: `DATABASE_URL`, `TOKEN_ENCRYPTION_KEY`, the Whop and Stripe keys plus the webhook secret, Supabase Storage, `YOUTUBE_API_KEY`, and an https `APP_URL`. Demo sign-in, mock data, simulated billing, the local database and local file storage are all disabled. So a forgotten key can't turn into free subscriptions, an open `/admin`, or data written to a disk that disappears.
+
+For a staging or review deploy without real keys, set `ALLOW_DEMO=true`. Never set it on the real site.
+
+**Hosting.** The app works on Vercel or any Node host (Railway, Fly, Render, a VPS):
+- **Submitting with the clip file** runs as a resumable job. Each request does one short step: create and upload the file to Whop, check processing status, then create the submission. The browser drives it, and resumes it if the tab was closed. Only the upload step is long, bounded by the clip size (max 1 GB). Its route allows up to 300 s (`maxDuration`); on Vercel use Fluid compute or Pro.
+- **Daily cron:** `vercel.json` schedules `/api/cron/youtube-retention`, which refreshes or expires stored YouTube data within 30 days as the YouTube API policy requires. Set `CRON_SECRET`. On other hosts, call it daily with `Authorization: Bearer $CRON_SECRET`.
+- **Migrations:** run `npm run db:migrate` against `DATABASE_URL` on every deploy that adds a migration.
+
+**Legal pages.** `/terms` and `/privacy` are linked from the landing page, pricing (next to the trial button), Settings and the research pages. Set `LEGAL_ENTITY_NAME` and `LEGAL_CONTACT_EMAIL`. The text is a solid starting template, not legal advice: have it reviewed before launch.
+
 ## Billing (Stripe)
 
 There is **no free plan**. A signed-in user without a plan is sent to `/pricing`.
@@ -138,7 +151,7 @@ There are three options: **Light**, **Dark** and **System** (the default, which 
 
 **End-to-end tests**
 ```bash
-rm -rf .data && npm run build && npm start      # fresh demo database
+rm -rf .data && npm run build && ALLOW_DEMO=true npm start   # fresh demo database
 npm run test:e2e                                 # default=system, persists on reload, no flash, sign-in sync, keyboard
 node scripts/contrast-audit.mjs --shots ./shots  # every page × light/dark × mobile/desktop
 ```

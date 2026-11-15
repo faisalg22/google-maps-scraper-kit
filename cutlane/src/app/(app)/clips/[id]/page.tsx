@@ -9,6 +9,8 @@ import { deleteClip } from "@/app/actions";
 import { PostingPanel } from "@/components/PostingPanel";
 import { SubmitPanel } from "@/components/SubmitPanel";
 import { ClipSettings } from "@/components/ClipSettings";
+import { SubmissionJobRunner } from "@/components/SubmissionJob";
+import { one as dbOne } from "@/lib/db";
 import { BackLink, CopyrightNotice, StatusBadge, formatBytes, formatDate } from "@/components/ui";
 
 export default async function ClipPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,7 +22,11 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
   const campaign = clip.campaign_id ? await getCampaign(user.id, clip.campaign_id).catch(() => null) : null;
 
   const urls = links.filter(linkIsSubmittable).map((l) => l.url!);
-  const activeSub = subs.find((s) => ["submitted", "in_progress", "approved"].includes(s.status));
+  const activeSub = subs.find((s) => ["queued", "submitted", "in_progress", "approved"].includes(s.status));
+  const job = await dbOne<{ id: string; job_state: "queued" | "uploading" | "processing" | "creating" | "failed"; job_error: string | null }>(
+    `select id, job_state, job_error from submissions where clip_id = $1 and user_id = $2 and job_state <> 'done' order by submitted_at desc limit 1`,
+    [clip.id, user.id],
+  );
   const blockers: string[] = [];
   if (!clip.campaign_id) blockers.push("Link the clip to a campaign (re-import from the campaign page).");
   else if (campaign && campaign.status !== "open") blockers.push(`The campaign is ${campaign.status}.`);
@@ -29,7 +35,7 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
     if (l.url && l.check_status === "blocked" && !l.manual_confirmed) blockers.push(`Confirm the ${l.platform.replace("_", " ")} link loads when logged out.`);
     if (l.url && l.check_status === "failed") blockers.push(`Fix the ${l.platform.replace("_", " ")} link: it doesn't load.`);
   }
-  if (activeSub) blockers.push(activeSub.status === "approved" ? "Already approved." : "Already submitted and waiting for review.");
+  if (activeSub) blockers.push(activeSub.status === "approved" ? "Already approved." : activeSub.status === "queued" ? "Being sent to Whop." : "Already submitted and waiting for review.");
   const canAttach = !campaign || campaign.deliverableTypes.length === 0 || campaign.deliverableTypes.includes("media");
   if (!ent.canWrite) blockers.unshift("Your plan is restricted. Update billing to post and submit.");
   const locked = Boolean(activeSub) || !ent.canWrite;
@@ -75,7 +81,8 @@ export default async function ClipPage({ params }: { params: Promise<{ id: strin
 
           <section>
             <h2 className="mb-3 text-lg font-semibold">2 · Submit to Whop</h2>
-            <SubmitPanel clipId={clip.id} urls={urls} blockers={blockers} canAttach={canAttach} isDemo={!modes.whop} />
+            {job && <div className="mb-3"><SubmissionJobRunner jobId={job.id} initialState={job.job_state} initialError={job.job_error} /></div>}
+            {!job || job.job_state === "failed" ? <SubmitPanel clipId={clip.id} urls={urls} blockers={blockers} canAttach={canAttach} isDemo={!modes.whop} /> : null}
           </section>
 
           {subs.length > 0 && (

@@ -6,14 +6,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireUser, startSession, endSession, upsertUser } from "@/lib/auth/session";
 import { one, q, pgTextArray } from "@/lib/db";
-import { modes } from "@/lib/env";
+import { demoAllowed, modes } from "@/lib/env";
 import { getClip, linkIsSubmittable, listPostLinks } from "@/lib/repo";
 import { createUploadTarget, keyBelongsTo, objectSize, deleteObject, MAX_CLIP_BYTES } from "@/lib/storage";
 import { CHECKLISTS, validatePostUrl } from "@/lib/posting/platforms";
 import { checkPublicLink } from "@/lib/posting/linkcheck";
 import { PLATFORMS, type Platform } from "@/lib/whop/campaigns-core";
 import { getCampaign } from "@/lib/whop/campaigns";
-import { createSubmission, listMySubmissions, uploadClipToWhop } from "@/lib/whop/submissions";
+import { createSubmission, listMySubmissions } from "@/lib/whop/submissions";
 import { revokeAndDelete } from "@/lib/whop/oauth";
 import { toActionState, type ActionState } from "@/lib/action-errors";
 import { assertCanWrite, assertMonthlyHeadroom, assertTotalLimit, consume } from "@/lib/billing/server";
@@ -26,6 +26,7 @@ export type { ActionState };
 /** Demo sign-in: only available while Whop is not configured. */
 export async function demoSignIn() {
   if (modes.whop) throw new Error("Demo sign-in is disabled because Whop is configured.");
+  if (!demoAllowed()) throw new Error("Demo sign-in is disabled in production.");
   const user = await upsertUser({
     whopUserId: "user_demo_editor",
     username: "demo_editor",
@@ -244,7 +245,7 @@ export async function submitClip(clipId: string, _prev: ActionState, form: FormD
     if (!urls.length) return { error: "Add at least one live post link that loads publicly before submitting." };
 
     const active = await one(
-      `select id from submissions where clip_id = $1 and status in ('submitted','in_progress','approved') limit 1`,
+      `select id from submissions where clip_id = $1 and status in ('queued','submitted','in_progress','approved') limit 1`,
       [clipId],
     );
     if (active) return { error: "This clip already has an active or approved submission." };
@@ -257,27 +258,40 @@ export async function submitClip(clipId: string, _prev: ActionState, form: FormD
     const idempotencyKey = crypto.randomUUID();
     // Reserve one "submission this month"; given back if Whop rejects the call.
     const unit = await consume("submissions_monthly");
-    try {
-    if (!modes.whop) {
-      await q(
-        `insert into submissions (user_id, clip_id, bounty_id, whop_submission_id, status, caption, urls, file_ids, idempotency_key, is_demo)
-         values ($1, $2, $3, $4, 'submitted', $5, $6::text[], $7::text[], $8, true)`,
-        [user.id, clipId, clip.campaign_id, `demo_btys_${idempotencyKey.slice(0, 8)}`, caption || null, pgTextArray(urls), pgTextArray(attachFile && canAttach ? ["demo_file"] : []), idempotencyKey],
-      );
-    } else {
-      let fileIds: string[] = [];
-      if (attachFile && canAttach) {
-        const fileId = clip.whop_file_id ?? (await uploadClipToWhop(user.id, clip.storage_key, clip.file_name, idempotencyKey));
-        if (!clip.whop_file_id) await q(`update clips set whop_file_id = $2 where id = $1`, [clipId, fileId]);
-        fileIds = [fileId];
-      }
-      const sub = await createSubmission(user.id, { bountyId: clip.campaign_id, urls, fileIds, caption, idempotencyKey });
-      await q(
-        `insert into submissions (user_id, clip_id, bounty_id, whop_submission_id, status, caption, urls, file_ids, idempotency_key, raw)
-         values ($1, $2, $3, $4, $5, $6, $7::text[], $8::text[], $9, $10::jsonb)`,
-        [user.id, clipId, clip.campaign_id, sub.id, sub.status ?? "submitted", caption || null, pgTextArray(urls), pgTextArray(fileIds), idempotencyKey, JSON.stringify(sub)],
-      );
+
+    if (attachFile && canAttach) {
+      // With a file: queue a resumable job (upload → Whop processing → create), one short request per step.
+      // The browser drives it via POST /api/submissions/:id/advance and resumes it if the tab was closed.
+      const row = await one<{ id: string }>(
+        `insert into submissions (user_id, clip_id, bounty_id, status, caption, urls, file_ids, idempotency_key, is_demo,
+                                  job_state, attach_file, usage_period_start)
+         values ($1, $2, $3, 'queued', $4, $5::text[], '{}', $6, $7, 'queued', true, $8::timestamptz) returning id`,
+        [user.id, clipId, clip.campaign_id, caption || null, pgTextArray(urls), idempotencyKey, !modes.whop, unit.periodStart.toISOString()],
+      ).catch(async (e) => {
+        await unit.release();
+        throw e;
+      });
+      await q(`update clips set status = 'submitted', updated_at = now() where id = $1`, [clipId]);
+      revalidatePath("/submissions");
+      return { ok: true, message: "Sending to Whop…", jobId: row!.id };
     }
+
+    try {
+      if (!modes.whop) {
+        await q(
+          `insert into submissions (user_id, clip_id, bounty_id, whop_submission_id, status, caption, urls, file_ids, idempotency_key, is_demo, usage_period_start)
+           values ($1, $2, $3, $4, 'submitted', $5, $6::text[], '{}', $7, true, $8::timestamptz)`,
+          [user.id, clipId, clip.campaign_id, `demo_btys_${idempotencyKey.slice(0, 8)}`, caption || null, pgTextArray(urls), idempotencyKey, unit.periodStart.toISOString()],
+        );
+      } else {
+        // Links only: a single fast call.
+        const sub = await createSubmission(user.id, { bountyId: clip.campaign_id, urls, fileIds: [], caption, idempotencyKey });
+        await q(
+          `insert into submissions (user_id, clip_id, bounty_id, whop_submission_id, status, caption, urls, file_ids, idempotency_key, raw, usage_period_start)
+           values ($1, $2, $3, $4, $5, $6, $7::text[], '{}', $8, $9::jsonb, $10::timestamptz)`,
+          [user.id, clipId, clip.campaign_id, sub.id, sub.status ?? "submitted", caption || null, pgTextArray(urls), idempotencyKey, JSON.stringify(sub), unit.periodStart.toISOString()],
+        );
+      }
     } catch (e) {
       await unit.release();
       throw e;
@@ -286,6 +300,29 @@ export async function submitClip(clipId: string, _prev: ActionState, form: FormD
     revalidatePath(`/clips/${clipId}`);
     revalidatePath("/submissions");
     return { ok: true, message: modes.whop ? "Submitted to Whop. It's now pending review." : "Demo submission recorded (nothing was sent to Whop)." };
+  } catch (err) {
+    return toActionState(err);
+  }
+}
+
+/** Try a failed submission again (reserves a new unit; the failed attempt's unit was refunded). */
+export async function retrySubmission(submissionId: string): Promise<ActionState & { jobId?: string }> {
+  try {
+    const user = await requireUser();
+    await assertCanWrite("whop_submit");
+    const row = await one<{ clip_id: string | null }>(
+      `select clip_id from submissions where id::text = $1 and user_id = $2 and job_state = 'failed' and attach_file`,
+      [submissionId, user.id],
+    );
+    if (!row) return { error: "Nothing to retry." };
+    const unit = await consume("submissions_monthly");
+    await q(
+      `update submissions set job_state = 'queued', status = 'queued', job_error = null, job_attempts = 0, job_updated_at = now(),
+              file_ids = '{}', usage_period_start = $3::timestamptz, idempotency_key = $4 where id::text = $1 and user_id = $2`,
+      [submissionId, user.id, unit.periodStart.toISOString(), crypto.randomUUID()],
+    );
+    if (row.clip_id) await q(`update clips set status = 'submitted', updated_at = now() where id = $1`, [row.clip_id]);
+    return { ok: true, message: "Retrying…", jobId: submissionId };
   } catch (err) {
     return toActionState(err);
   }

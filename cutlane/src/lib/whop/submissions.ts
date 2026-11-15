@@ -24,13 +24,8 @@ interface WhopFile {
   upload_headers?: Record<string, string>;
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/**
- * Upload a stored clip to Whop Files: create file record → PUT bytes to the presigned URL
- * (server-to-server, the browser never sees it) → poll until `ready`.
- */
-export async function uploadClipToWhop(userId: string, storageKey: string, fileName: string, idempotencyKey: string): Promise<string> {
+/** Step 1 of a file submission: create the Whop file record and PUT the bytes (server to server). */
+export async function createAndUploadFile(userId: string, storageKey: string, fileName: string, idempotencyKey: string): Promise<string> {
   const { stream, size } = await openObjectStream(storageKey);
   const file = await whopFetch<WhopFile>(userId, "/files", {
     method: "POST",
@@ -38,26 +33,20 @@ export async function uploadClipToWhop(userId: string, storageKey: string, fileN
     idempotencyKey: `${idempotencyKey}:file`,
   });
   if (!file.upload_url) throw new Error("Whop did not return an upload URL (multipart uploads are not supported yet).");
-
   const put = await fetch(file.upload_url, {
     method: "PUT",
     headers: { ...(file.upload_headers ?? {}), ...(size ? { "Content-Length": String(size) } : {}) },
     body: stream,
-    // Node fetch requires half-duplex for streamed request bodies.
     duplex: "half",
   } as RequestInit & { duplex: "half" });
   if (!put.ok) throw new Error(`Uploading the clip to Whop failed (HTTP ${put.status}).`);
+  return file.id;
+}
 
-  // Poll for readiness: ~2 minutes max with gentle backoff.
-  let delay = 1000;
-  for (let i = 0; i < 20; i++) {
-    const f = await whopFetch<WhopFile>(userId, `/files/${file.id}`);
-    if (f.upload_status === "ready") return f.id;
-    if (f.upload_status === "failed") throw new Error("Whop could not process the uploaded clip.");
-    await sleep(delay);
-    delay = Math.min(delay * 1.5, 8000);
-  }
-  throw new Error("Whop is still processing the clip. Try submitting again in a minute.");
+/** Step 2: one quick status check (the caller polls). */
+export async function fileUploadStatus(userId: string, fileId: string): Promise<WhopFile["upload_status"]> {
+  const f = await whopFetch<WhopFile>(userId, `/files/${encodeURIComponent(fileId)}`);
+  return f.upload_status;
 }
 
 export async function createSubmission(

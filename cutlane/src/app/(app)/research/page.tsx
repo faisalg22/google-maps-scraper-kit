@@ -1,3 +1,5 @@
+import { after } from "next/server";
+import { refreshStaleYouTubeData } from "@/lib/youtube/retention";
 import Link from "next/link";
 import { requirePageAccess } from "@/lib/billing/server";
 import { modes } from "@/lib/env";
@@ -32,6 +34,8 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
     [billing.workspace.id],
   );
   const savedLimit = billing.ent.limits.saved_channels;
+  // Keep stored YouTube data fresh (API policy), after the response is sent.
+  after(() => refreshStaleYouTubeData({ workspaceId: billing.workspace.id, limit: 10 }).catch(() => undefined));
 
   return (
     <>
@@ -145,6 +149,11 @@ export default async function ResearchPage({ searchParams }: { searchParams: Pro
           </div>
         </>
       )}
+      <p className="mt-10 text-xs text-muted">
+        Uses YouTube API Services.{" "}
+        <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" className="underline">YouTube Terms of Service</a> ·{" "}
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">Google Privacy Policy</a>
+      </p>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import "server-only";
-import { modes } from "../env";
+import { modes, requireLiveOrDemo } from "../env";
 import { MOCK_CAMPAIGNS } from "../mock/campaigns";
 import { applyFilters, normaliseBounty, type Campaign, type CampaignFilters } from "./campaigns-core";
 import { captureSampleOnce, whopFetch } from "./client";
@@ -16,6 +16,7 @@ export interface CampaignPage {
 }
 
 export async function listCampaigns(userId: string, filters: CampaignFilters, after?: string): Promise<CampaignPage> {
+  requireLiveOrDemo(modes.whop, "Whop", "WHOP_CLIENT_ID, WHOP_CLIENT_SECRET, WHOP_REDIRECT_URI");
   if (!modes.whop) {
     return { campaigns: applyFilters(MOCK_CAMPAIGNS, { ...filters, status: filters.status ?? "open" }), nextCursor: null, source: "demo" };
   }
@@ -42,6 +43,7 @@ export async function listCampaigns(userId: string, filters: CampaignFilters, af
 }
 
 export async function getCampaign(userId: string, id: string): Promise<Campaign | null> {
+  requireLiveOrDemo(modes.whop, "Whop", "WHOP_CLIENT_ID, WHOP_CLIENT_SECRET, WHOP_REDIRECT_URI");
   if (!modes.whop) return MOCK_CAMPAIGNS.find((c) => c.id === id) ?? null;
   if (!/^bnty_[A-Za-z0-9]+$/.test(id)) return null;
   try {

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { submitClip, type ActionState } from "@/app/actions";
 import { ActionFeedback } from "./billing";
+import { SubmissionJobRunner } from "./SubmissionJob";
 
 export function SubmitPanel({
   clipId,
@@ -59,10 +60,10 @@ export function SubmitPanel({
         <p className="text-xs text-muted">This campaign accepts post links only, so the file isn&apos;t attached.</p>
       )}
 
-      <ActionFeedback state={state} />
+      {state?.jobId ? <SubmissionJobRunner jobId={state.jobId} initialState="queued" /> : <ActionFeedback state={state} />}
 
       <button disabled={disabled} className="btn-primary w-full">
-        {pending ? "Submitting… (uploading can take a minute)" : isDemo ? "Submit (demo)" : "Submit to Whop"}
+        {pending ? "Submitting…" : isDemo ? "Submit (demo)" : "Submit to Whop"}
       </button>
     </form>
   );

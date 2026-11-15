@@ -7,7 +7,7 @@ import { z } from "zod";
 import { PLANS, type Metric } from "@/config/plans";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { one, q } from "@/lib/db";
-import { env, modes } from "@/lib/env";
+import { demoAllowed, env, modes } from "@/lib/env";
 import { sha256 } from "@/lib/crypto";
 import { salesInbox, sendEmail } from "@/lib/email";
 import { toActionState, type ActionState } from "@/lib/action-errors";
@@ -46,6 +46,7 @@ export async function startCheckout(form: FormData) {
   const withTrial = PLANS[d.plan].trialDays > 0 && (await trialEligible(user, ws));
 
   if (!modes.stripe) {
+    if (!demoAllowed()) redirect("/pricing?checkout=unavailable");
     redirect(`/billing/mock-checkout?plan=${d.plan}&interval=${d.interval}&trial=${withTrial ? 1 : 0}`);
   }
   const url = await createCheckoutSession({ ws, email: user.email, plan: d.plan, interval: d.interval, withTrial });
@@ -62,6 +63,7 @@ export async function openPortal() {
 
 function assertTestMode() {
   if (modes.stripe) throw new Error("Test-mode billing controls are disabled when Stripe is live.");
+  if (!demoAllowed()) throw new Error("Test-mode billing is disabled in production.");
 }
 
 export async function mockCompleteCheckout(form: FormData) {

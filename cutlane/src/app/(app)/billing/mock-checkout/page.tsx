@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PLANS } from "@/config/plans";
-import { modes } from "@/lib/env";
+import { demoAllowed, modes } from "@/lib/env";
 import { getBilling, trialEligible } from "@/lib/billing/server";
 import { mockCompleteCheckout } from "@/app/billing-actions";
 import { DemoTag } from "@/components/ui";
@@ -10,7 +10,7 @@ export const metadata = { title: "Checkout (test mode)" };
 
 /** Stand-in for Stripe Checkout while STRIPE_SECRET_KEY is not set. */
 export default async function MockCheckout({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  if (modes.stripe) redirect("/pricing");
+  if (modes.stripe || !demoAllowed()) redirect("/pricing");
   const sp = await searchParams;
   const plan = sp.plan === "clipper" ? "clipper" : "beginner";
   const interval = sp.interval === "year" ? "year" : "month";

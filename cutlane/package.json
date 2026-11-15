@@ -11,7 +11,7 @@
     "test": "vitest run",
     "db:migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
     "keygen": "node -e \"console.log(require('crypto').randomBytes(32).toString('base64'))\"",
-    "test:e2e": "node --test e2e/*.e2e.test.mjs"
+    "test:e2e": "node --test --test-concurrency=1 e2e/*.e2e.test.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.16",
