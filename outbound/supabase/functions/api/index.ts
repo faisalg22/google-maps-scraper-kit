@@ -10,6 +10,7 @@
 //   GET   /api/settings                kill switch state
 //   PATCH /api/settings                { sending_paused: boolean }
 //   GET   /api/runs                    recent Apify imports
+//   POST  /api/import/apollo           { rows: [...] }  Apollo CSV export as JSON objects keyed by header
 import { adminClient, cors, json, requireAdmin } from "../_shared/auth.ts";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -136,6 +137,21 @@ Deno.serve(async (req) => {
       const { data, error } = await db.from("app_settings").update({ sending_paused: body.sending_paused }).eq("id", true).select().single();
       if (error) throw error;
       return json(data);
+    }
+
+    // ---- contact list import (Apollo CSV export converted to JSON rows)
+    if (resource === "import" && req.method === "POST") {
+      const source = id ?? "apollo";
+      if (!/^[a-z_]{2,40}$/.test(source)) return json({ error: "Bad source" }, 400);
+      if (!Array.isArray(body.rows) || body.rows.length === 0) return json({ error: "Send { rows: [...] }" }, 400);
+      if (body.rows.length > 5000) return json({ error: "At most 5000 rows per request" }, 400);
+      const total: Record<string, number> = {};
+      for (let i = 0; i < body.rows.length; i += 500) {
+        const { data, error } = await db.rpc("import_apollo_contacts", { items: body.rows.slice(i, i + 500), p_source: source });
+        if (error) return json({ error: error.message }, 400);
+        for (const [k, v] of Object.entries(data ?? {})) total[k] = (total[k] ?? 0) + Number(v);
+      }
+      return json({ ok: true, ...total });
     }
 
     // ---- import history

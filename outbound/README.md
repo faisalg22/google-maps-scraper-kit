@@ -91,6 +91,7 @@ Dashboard API (needs a signed-in admin's access token as `Authorization: Bearer 
 | PATCH | `/api/meetings/:id` | `{status: held\|no_show\|cancelled}` |
 | GET/PATCH | `/api/settings` | `{sending_paused: true\|false}` |
 | GET | `/api/runs` | — |
+| POST | `/api/import/apollo` | `{rows: [...]}` — Apollo CSV export rows keyed by header (or use `scripts/import_csv.py`) |
 
 ### Scheduled pulls (optional)
 
@@ -118,6 +119,15 @@ supabase functions deploy api
 
 `apify-import` and `apify-start` check the import secret or an admin login themselves, so they are
 deployed without Supabase's JWT check (Apify's webhook can't send a Supabase JWT).
+
+## Importing Apollo contacts
+
+Apollo's free plan has no API search, so export from the Apollo web app (People search → select →
+Export CSV) and load the file with `ACCESS_TOKEN=... python3 outbound/scripts/import_csv.py export.csv`.
+`import_apollo_contacts()` matches companies by domain or name, dedupes by email, skips suppressed
+addresses, and records consent basis **`none`**: a licensed contact is not proof of CASL implied
+consent, so the send gate blocks these leads until someone confirms the address is conspicuously
+published and updates `consent_log`.
 
 ## Data handling
 
